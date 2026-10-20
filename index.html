@@ -534,12 +534,11 @@
                 }
             }
 
-            // Visual zoom scale mapping for high zoom multipliers up to 100x
             const videoEl = document.getElementById("videoElement");
             let visualScale = 1.0;
             if (zoomValue === 0.5) visualScale = 0.8;
             else if (zoomValue === 1.0) visualScale = 1.0;
-            else visualScale = 1.0 + (zoomValue - 1.0) * 0.15; // Smooth proportional scaling
+            else visualScale = 1.0 + (zoomValue - 1.0) * 0.15;
 
             videoEl.style.transform = `scale(${visualScale})`;
         }
