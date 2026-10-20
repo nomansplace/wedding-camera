@@ -50,20 +50,20 @@
             <h1 class="font-serif text-3xl font-bold text-weddingRed mb-1">Gunjan & Henri</h1>
             <p class="text-xs uppercase tracking-widest text-weddingGold font-semibold mb-6">October 9–19, 2026 • India & Finland</p>
             
-            <div class="space-y-4 text-left">
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-sm font-semibold text-weddingDark mb-1">Your Name / Family Name *</label>
-                    <input type="text" id="guestNameInput" placeholder="e.g. Priya Sharma" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
+                    <input type="text" id="guestNameInput" required placeholder="e.g. Priya Sharma" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-weddingDark mb-1">Event Passcode *</label>
-                    <input type="password" id="passcodeInput" placeholder="Enter passcode (17102026)" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
-                    <p class="text-xs text-gray-500 mt-1 italic">Passcode: 17102026</p>
+                    <input type="password" id="passcodeInput" required placeholder="Enter passcode" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
+                    <p id="passcodeHint" class="text-xs text-gray-500 mt-1 italic">Hint: The date of the grand celebration (DDMMYYYY)</p>
                 </div>
-                <button type="button" onclick="handleLoginSubmit()" class="w-full py-3.5 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 transition duration-200 uppercase tracking-wider text-sm">
+                <button type="submit" class="w-full py-3.5 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 transition duration-200 uppercase tracking-wider text-sm">
                     Enter Celebration <i class="fa-solid fa-arrow-right ml-2"></i>
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -100,29 +100,52 @@
 
             <!-- TAB 1: CAMERA & VIDEO -->
             <section id="tab-camera" class="space-y-4 max-w-lg mx-auto pb-10">
-                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Event Date:</label>
-                    <select id="eventSelector" class="w-full p-2.5 rounded-lg border border-gray-300 font-semibold text-weddingDark bg-weddingCream focus:outline-none focus:border-weddingGold">
-                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
-                        <option value="Shopping & Mehndi Night (Oct 10)">Shopping & Mehndi Night (Oct 10)</option>
-                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai & Ring Ceremony (Oct 11)</option>
-                        <option value="Haldi Ceremony (Oct 12)">Haldi Ceremony (Oct 12)</option>
-                        <option value="Sangeet Night (Oct 13)">Sangeet Night (Oct 13)</option>
-                        <option value="Hindu Wedding & Pheras (Oct 14)" selected>Hindu Wedding & Pheras (Oct 14)</option>
-                        <option value="Grand Reception (Oct 15)">Grand Reception (Oct 15)</option>
-                        <option value="Family Farewell (Oct 16)">Family Farewell (Oct 16)</option>
-                        <option value="Christian Wedding Ceremony (Oct 17)">Christian Wedding Ceremony (Oct 17)</option>
-                        <option value="Celebration & Pre-Departure (Oct 18)">Celebration & Pre-Departure (Oct 18)</option>
-                        <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
-                    </select>
+                <!-- Event & Resolution Selectors -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Event Date:</label>
+                        <select id="eventSelector" onchange="updateFiltersForEvent()" class="w-full p-2 rounded-lg border border-gray-300 text-xs font-semibold text-weddingDark bg-weddingCream focus:outline-none focus:border-weddingGold">
+                            <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
+                            <option value="Shopping & Mehndi Night (Oct 10)">Shopping & Mehndi Night (Oct 10)</option>
+                            <option value="Sagai & Ring Ceremony (Oct 11)">Sagai & Ring Ceremony (Oct 11)</option>
+                            <option value="Haldi Ceremony (Oct 12)">Haldi Ceremony (Oct 12)</option>
+                            <option value="Sangeet Night (Oct 13)">Sangeet Night (Oct 13)</option>
+                            <option value="Hindu Wedding & Pheras (Oct 14)" selected>Hindu Wedding (Oct 14)</option>
+                            <option value="Grand Reception (Oct 15)">Grand Reception (Oct 15)</option>
+                            <option value="Family Farewell (Oct 16)">Family Farewell (Oct 16)</option>
+                            <option value="Christian Wedding Ceremony (Oct 17)">Christian Wedding (Oct 17)</option>
+                            <option value="Celebration & Pre-Departure (Oct 18)">Pre-Departure (Oct 18)</option>
+                            <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Camera Resolution:</label>
+                        <select id="resolutionSelector" onchange="changeResolution()" class="w-full p-2 rounded-lg border border-gray-300 text-xs font-semibold text-weddingDark bg-weddingCream focus:outline-none focus:border-weddingGold">
+                            <option value="hd">HD (720p)</option>
+                            <option value="fhd" selected>Full HD (1080p)</option>
+                            <option value="4k">4K UHD (Ultra HD)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Camera Preview -->
+                <!-- Camera Viewport / Preview -->
                 <div class="relative bg-black rounded-2xl overflow-hidden shadow-lg aspect-[3/4] flex items-center justify-center">
-                    <video id="videoElement" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <video id="videoElement" autoplay playsinline class="w-full h-full object-cover transition-transform duration-200"></video>
                     <canvas id="canvasElement" class="hidden"></canvas>
                     <img id="imagePreview" class="hidden w-full h-full object-contain bg-black" alt="Captured Photo">
+                    <video id="videoPreview" class="hidden w-full h-full object-contain bg-black" controls></video>
                     
+                    <!-- Zoom Level Pill on Viewfinder -->
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-weddingGold text-xs font-bold px-3 py-1 rounded-full border border-white/20">
+                        Zoom: <span id="currentZoomLabel">1.0x</span>
+                    </div>
+
+                    <!-- Recording Indicator Badge -->
+                    <div id="recordingBadge" class="hidden absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-lg animate-pulse">
+                        <i class="fa-solid fa-circle mr-1.5 text-[8px]"></i> Recording Video...
+                    </div>
+
+                    <!-- Watermark Overlay Badge with Rotating Hashtag -->
                     <div class="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-sm text-white p-2.5 rounded-xl text-xs flex justify-between items-center pointer-events-none border border-white/20">
                         <div>
                             <p id="watermarkGuest" class="font-bold text-weddingGold">Guest: --</p>
@@ -131,21 +154,70 @@
                     </div>
                 </div>
 
-                <!-- Upload Button -->
-                <div class="flex items-center justify-center space-x-2">
-                    <label class="cursor-pointer bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
-                        <i class="fa-solid fa-upload mr-2 text-weddingRed"></i> Upload Photos / Videos
-                        <input type="file" accept="image/*,video/*" multiple onchange="handleFileUpload(event)" class="hidden">
-                    </label>
+                <!-- Extended Zoom Controls Bar (0.5x, 1x, 2x, 3x, 5x, 10x, 20x, 30x, 50x, 75x, 100x) -->
+                <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase mb-1 text-center">Ultra Zoom Level</div>
+                    <div class="flex space-x-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                        <button onclick="setZoom(0.5, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">0.5x</button>
+                        <button onclick="setZoom(1.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-weddingRed text-weddingGold shadow transition">1.0x</button>
+                        <button onclick="setZoom(2.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">2.0x</button>
+                        <button onclick="setZoom(3.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">3.0x</button>
+                        <button onclick="setZoom(5.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">5.0x</button>
+                        <button onclick="setZoom(10.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">10x</button>
+                        <button onclick="setZoom(20.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">20x</button>
+                        <button onclick="setZoom(30.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">30x</button>
+                        <button onclick="setZoom(50.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">50x</button>
+                        <button onclick="setZoom(75.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">75x</button>
+                        <button onclick="setZoom(100.0, this)" class="zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition">100x</button>
+                    </div>
                 </div>
 
-                <!-- Controls -->
+                <!-- Multiple File Upload & Switch Camera -->
+                <div class="flex items-center justify-center space-x-2">
+                    <label class="cursor-pointer bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
+                        <i class="fa-solid fa-upload mr-2 text-weddingRed"></i> Upload Media
+                        <input type="file" accept="image/*,video/*" multiple onchange="handleFileUpload(event)" class="hidden">
+                    </label>
+                    <button onclick="toggleCameraFacing()" class="bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
+                        <i class="fa-solid fa-camera-rotate mr-2 text-weddingRed"></i> Switch Camera
+                    </button>
+                </div>
+
+                <!-- Filter Selector -->
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Tailored Event Filters</span>
+                        <span id="recommendedBadge" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">⭐ Recommended</span>
+                    </div>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin">
+                        <button onclick="applyFilter('filter-royal', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border-2 border-weddingGold bg-amber-50 text-xs font-bold">👑 Royal Gold</button>
+                        <button onclick="applyFilter('filter-warm', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🌅 Sunset Warm</button>
+                        <button onclick="applyFilter('filter-vintage', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">📜 Vintage Sepia</button>
+                        <button onclick="applyFilter('filter-cinematic', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🎬 Cinematic</button>
+                        <button onclick="applyFilter('filter-golden', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">✨ Golden Hour</button>
+                        <button onclick="applyFilter('filter-vibrant', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🔥 Vibrant Pop</button>
+                        <button onclick="applyFilter('filter-soft', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🌸 Soft Glow</button>
+                        <button onclick="applyFilter('filter-matte', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">📷 Matte Noir</button>
+                        <button onclick="applyFilter('filter-dramatic', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">⚡ High Contrast</button>
+                        <button onclick="applyFilter('', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">Original</button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Snap Photo & Record Video -->
                 <div id="captureControls" class="grid grid-cols-2 gap-3">
                     <button onclick="capturePhoto()" class="py-3.5 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide">
                         <i class="fa-solid fa-camera mr-2 text-lg"></i> Snap Photo
                     </button>
-                    <button onclick="alert('Camera snap active!')" class="py-3.5 bg-weddingGold text-weddingRed font-bold rounded-xl shadow-lg flex items-center justify-center text-sm tracking-wide">
-                        <i class="fa-solid fa-video mr-2 text-lg"></i> Video
+                    <button id="recordVideoBtn" onclick="toggleVideoRecording()" class="py-3.5 bg-weddingGold text-weddingRed font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide">
+                        <i class="fa-solid fa-video mr-2 text-lg"></i> Record Video
+                    </button>
+                </div>
+                <div id="retakeControls" class="hidden flex space-x-3">
+                    <button onclick="retakePhoto()" class="flex-1 py-3 bg-gray-200 text-gray-800 font-bold rounded-xl shadow hover:bg-gray-300">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Retake
+                    </button>
+                    <button onclick="confirmAndUpload()" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save & Sync
                     </button>
                 </div>
             </section>
@@ -153,6 +225,20 @@
             <!-- TAB 2: GALLERY -->
             <section id="tab-gallery" class="hidden space-y-4 pb-10">
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <select id="galleryFilterEvent" onchange="renderGallery()" class="text-xs font-bold p-2 rounded-lg border border-gray-300 bg-weddingCream text-weddingDark">
+                        <option value="all">All Events Gallery</option>
+                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
+                        <option value="Shopping & Mehndi Night (Oct 10)">Mehndi Night (Oct 10)</option>
+                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai (Oct 11)</option>
+                        <option value="Haldi Ceremony (Oct 12)">Haldi (Oct 12)</option>
+                        <option value="Sangeet Night (Oct 13)">Sangeet (Oct 13)</option>
+                        <option value="Hindu Wedding & Pheras (Oct 14)">Hindu Wedding (Oct 14)</option>
+                        <option value="Grand Reception (Oct 15)">Reception (Oct 15)</option>
+                        <option value="Family Farewell (Oct 16)">Farewell (Oct 16)</option>
+                        <option value="Christian Wedding Ceremony (Oct 17)">Christian Wedding (Oct 17)</option>
+                        <option value="Celebration & Pre-Departure (Oct 18)">Pre-Departure (Oct 18)</option>
+                        <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
+                    </select>
                     <span id="photoCountBadge" class="text-xs font-bold text-weddingRed">0 Media Items</span>
                 </div>
                 <div id="galleryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
@@ -161,158 +247,764 @@
             <!-- TAB 3: SLIDESHOW -->
             <section id="tab-slideshow" class="hidden space-y-4 text-center pb-10">
                 <div class="bg-black rounded-2xl overflow-hidden shadow-xl relative aspect-[4/3] flex items-center justify-center">
-                    <img id="slideshowImage" src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-contain">
+                    <img id="slideshowImage" src="" class="w-full h-full object-contain" alt="Slideshow">
+                    <video id="slideshowVideo" src="" class="hidden w-full h-full object-contain" autoplay muted loop></video>
+                    <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md text-white p-3 rounded-xl text-left border border-white/20">
+                        <p id="slideshowCaption" class="font-bold text-weddingGold text-sm">--</p>
+                        <p id="slideshowMeta" class="text-xs text-gray-300">--</p>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="prevSlide()" class="px-5 py-2 bg-weddingRed text-weddingGold font-bold rounded-xl shadow"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                    <button onclick="toggleSlideshowPlay()" id="slideshowPlayBtn" class="px-5 py-2 bg-weddingGold text-weddingRed font-bold rounded-xl shadow"><i class="fa-solid fa-pause"></i> Pause</button>
+                    <button onclick="nextSlide()" class="px-5 py-2 bg-weddingRed text-weddingGold font-bold rounded-xl shadow">Next <i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </section>
 
             <!-- TAB 4: ITINERARY -->
             <section id="tab-itinerary" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
-                <div id="itineraryList" class="space-y-3"></div>
+                <div class="text-center mb-4">
+                    <h3 class="font-serif text-2xl font-bold text-weddingRed">10-Day Event Itinerary</h3>
+                    <p class="text-xs text-gray-500">October 9–19, 2026 • India & Finland</p>
+                </div>
+                <div class="space-y-3" id="itineraryList"></div>
             </section>
 
             <!-- TAB 5: GUESTBOOK -->
             <section id="tab-guestbook" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="font-serif text-lg font-bold text-weddingRed mb-2">Leave a Wish for Gunjan & Henri</h3>
-                    <textarea id="guestbookMessage" rows="3" placeholder="Write your wishes here..." class="w-full p-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-weddingGold bg-weddingCream mb-2"></textarea>
-                    <button onclick="submitWish()" class="w-full py-2.5 bg-weddingRed text-weddingGold font-bold rounded-xl text-sm shadow">Post Wish</button>
+                    <textarea id="guestbookMessage" rows="3" placeholder="Write your heartfelt wishes here..." class="w-full p-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-weddingGold bg-weddingCream mb-2"></textarea>
+                    <button onclick="submitGuestbookWish()" class="w-full py-2.5 bg-weddingRed text-weddingGold font-bold rounded-xl text-sm shadow">Post to Digital Guestbook</button>
                 </div>
                 <div id="guestbookList" class="space-y-3"></div>
             </section>
 
             <!-- TAB 6: ADMIN PANEL -->
             <section id="tab-admin" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-weddingGold text-center">
-                    <h3 class="font-serif text-xl font-bold text-weddingRed mb-2">Host Admin Panel</h3>
-                    <p class="text-xs text-gray-500">Welcome Gunjan & Henri!</p>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-weddingGold">
+                    <h3 class="font-serif text-xl font-bold text-weddingRed mb-1"><i class="fa-solid fa-shield-halved mr-2"></i> Host Admin Dashboard</h3>
+                    <p class="text-xs text-gray-500 mb-4">Restricted exclusively to Gunjan & Henri</p>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalPhotos" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Media</p>
+                        </div>
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalLikes" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Likes</p>
+                        </div>
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalWishes" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Wishes</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-weddingCream p-4 rounded-xl border border-gray-200 text-center space-y-3">
+                        <h4 class="font-bold text-sm text-weddingRed">Printable Royal Indian Wedding QR Code</h4>
+                        <div class="bg-white p-4 inline-block rounded-xl shadow-sm border">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://nomansplace.github.io/wedding-camera/" alt="Wedding QR Code" class="mx-auto rounded">
+                        </div>
+                        <p class="text-xs text-gray-500">Scan to open shared camera & album instantly on iOS/Android.</p>
+                        <button onclick="window.print()" class="px-4 py-2 bg-weddingRed text-weddingGold text-xs font-bold rounded-lg shadow">Print QR Card</button>
+                    </div>
                 </div>
             </section>
 
         </main>
     </div>
 
-    <!-- SCRIPT -->
-    <script>
-        const PASSCODE = "17102026";
-        let currentUser = { name: "", role: "Guest" };
-        let mediaStream = null;
-        let photos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-2xl px-3 py-1 bg-white/20 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+        <img id="lightboxImage" src="" class="hidden max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain">
+        <video id="lightboxVideo" src="" class="hidden max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain" controls autoplay></video>
+        <div class="bg-white/10 backdrop-blur-md text-white p-3 rounded-xl max-w-md w-full flex justify-between items-center border border-white/20">
+            <div>
+                <p id="lightboxCaption" class="font-bold text-weddingGold text-sm">--</p>
+                <p id="lightboxMeta" class="text-xs text-gray-300">--</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="likeCurrentPhoto()" class="text-rose-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-heart"></i> <span id="lightboxLikes" class="text-xs">0</span></button>
+                <a id="lightboxDownloadBtn" download="wedding-media.jpg" class="text-weddingGold hover:text-white text-xl"><i class="fa-solid fa-download"></i></a>
+            </div>
+        </div>
+    </div>
 
-        function handleLoginSubmit() {
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMmt0kPZzqk2DWZXc2z5Lbk-fJR0SxXzANf12pmJdi8NyjzF1IMjpmVRZsY49S5fFZA/exec";
+        const PASSCODE_CORRECT = "17102026";
+        
+        let currentUser = { name: "", role: "Guest" };
+        let currentFilter = "filter-royal";
+        let mediaStream = null;
+        let useFrontCamera = false;
+        let currentZoom = 1.0;
+        let currentResolutionSetting = "fhd";
+        let capturedBlob = null;
+        let isVideoMode = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let photos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+        let wishes = JSON.parse(localStorage.getItem("wedding_wishes") || '[{"name": "Ritika Kanojia", "text": "Wishing you both a lifetime of love and joy! #FenryWithHisGun"}]');
+        let currentLightboxIndex = null;
+        let slideshowTimer = null;
+        let slideshowIndex = 0;
+
+        const weddingHashtags = [
+            "#FenryWithHisGun",
+            "#GunjanWedsHenri",
+            "#TheFinlandIndianWedding",
+            "#NordicNuptials",
+            "#FromDelhiWithLove",
+            "#HelsinkiHoneys",
+            "#PherasInParadise",
+            "#CurryMeHenri"
+        ];
+        let currentHashtag = weddingHashtags[0];
+
+        function getRandomHashtag() {
+            const randomIndex = Math.floor(Math.random() * weddingHashtags.length);
+            return weddingHashtags[randomIndex];
+        }
+
+        const itineraries = [
+            { day: "Oct 9, 2026", title: "Welcome Dinner", time: "7:00 PM onwards", venue: "Grand Ballroom, Delhi", dress: "Smart Casual / Indo-Western" },
+            { day: "Oct 10, 2026", title: "Shopping & Mehndi Night", time: "4:00 PM onwards", venue: "Courtyard & Gardens", dress: "Vibrant Ethnic / Green & Yellow" },
+            { day: "Oct 11, 2026", title: "Sagai & Ring Ceremony", time: "6:30 PM onwards", venue: "Royal Banquet Hall", dress: "Formal Cocktail / Evening Wear" },
+            { day: "Oct 12, 2026", title: "Haldi Ceremony", time: "10:30 AM onwards", venue: "Poolside Lawns", dress: "Yellow Traditional / Kurta Pajama" },
+            { day: "Oct 13, 2026", title: "Sangeet Night", time: "7:00 PM onwards", venue: "Main Auditorium", dress: "Glitz & Glamour / Lehenga & Sherwani" },
+            { day: "Oct 14, 2026", title: "Hindu Wedding & Pheras", time: "5:00 PM onwards", venue: "Mandap Lawns", dress: "Traditional Indian Wedding Attire" },
+            { day: "Oct 15, 2026", title: "Grand Reception", time: "7:30 PM onwards", venue: "Grand Ballroom", dress: "Black Tie / Formal Indo-Western" },
+            { day: "Oct 16, 2026", title: "Family Farewell Brunch", time: "11:00 AM onwards", venue: "Garden Restaurant", dress: "Relaxed Day Wear" },
+            { day: "Oct 17, 2026", title: "Christian Wedding Ceremony", time: "2:00 PM onwards", venue: "Chapel & Gardens", dress: "Formal Wedding Attire" },
+            { day: "Oct 18, 2026", title: "Celebration & Pre-Departure", time: "6:00 PM onwards", venue: "Banquet Hall", dress: "Smart Casual" },
+            { day: "Oct 19, 2026", title: "Finland Celebration", time: "4:00 PM onwards", venue: "Helsinki Reception Hall", dress: "Nordic Formal / Smart Elegance" }
+        ];
+
+        const hints = [
+            "Hint: The grand wedding date (DDMMYYYY)",
+            "Hint: 17th October 2026 written compactly",
+            "Hint: Ask Gunjan or Henri if you forgot the numbers!"
+        ];
+        let hintIdx = 0;
+        setInterval(() => {
+            const hintEl = document.getElementById("passcodeHint");
+            if(hintEl) {
+                hintIdx = (hintIdx + 1) % hints.length;
+                hintEl.innerText = hints[hintIdx];
+            }
+        }, 5000);
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const savedUser = sessionStorage.getItem("wedding_session_user");
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                startAppSession();
+            }
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
             const name = document.getElementById("guestNameInput").value.trim();
             const passcode = document.getElementById("passcodeInput").value.trim();
 
-            if (!name) {
-                alert("Please enter your name!");
-                return;
-            }
-            if (passcode !== PASSCODE) {
-                alert("Incorrect passcode! Correct passcode is 17102026");
+            if (passcode !== PASSCODE_CORRECT) {
+                alert("Incorrect passcode! Please check the hint.");
                 return;
             }
 
             currentUser.name = name;
-            const lower = name.toLowerCase();
-            if (lower === "gunjan" || lower === "henri") {
+            const lowerName = name.toLowerCase();
+            if (lowerName === "gunjan" || lowerName === "henri") {
                 currentUser.role = "Host / Admin";
+            } else {
+                currentUser.role = "Guest";
+            }
+
+            sessionStorage.setItem("wedding_session_user", JSON.stringify(currentUser));
+            startAppSession();
+        }
+
+        function startAppSession() {
+            if (currentUser.role === "Host / Admin") {
                 document.getElementById("nav-admin").classList.remove("hidden");
+                document.getElementById("userBadge").innerText = "Host Admin";
+            } else {
+                document.getElementById("userBadge").innerText = "Honored Guest";
             }
 
             document.getElementById("loginScreen").classList.add("hidden");
             document.getElementById("appContainer").classList.remove("hidden");
             document.getElementById("watermarkGuest").innerText = `Guest: ${currentUser.name}`;
+            
+            currentHashtag = getRandomHashtag();
+            document.getElementById("watermarkHashtag").innerText = `${currentHashtag} • Gunjan & Henri`;
 
             initCamera();
-            renderGallery();
             renderItinerary();
+            renderGuestbook();
+            renderGallery();
         }
 
         function logout() {
+            sessionStorage.removeItem("wedding_session_user");
+            if(mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             location.reload();
         }
 
         function switchTab(tabId) {
             ['camera', 'gallery', 'slideshow', 'itinerary', 'guestbook', 'admin'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add("hidden");
+                document.getElementById(`nav-${t}`).classList.remove("text-weddingRed", "border-b-2", "border-weddingRed");
             });
             document.getElementById(`tab-${tabId}`).classList.remove("hidden");
+            document.getElementById(`nav-${tabId}`).classList.add("text-weddingRed");
+
+            if (tabId === 'slideshow') startSlideshow();
+            else stopSlideshow();
+            if (tabId === 'admin') updateAdminStats();
         }
 
         async function initCamera() {
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                document.getElementById("videoElement").srcObject = mediaStream;
-            } catch(e) {
-                console.log("Camera access error:", e);
+                if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+                
+                let widthConstraint = { ideal: 1080 };
+                let heightConstraint = { ideal: 1920 };
+                
+                if (currentResolutionSetting === 'hd') {
+                    widthConstraint = { ideal: 720 };
+                    heightConstraint = { ideal: 1280 };
+                } else if (currentResolutionSetting === '4k') {
+                    widthConstraint = { ideal: 2160 };
+                    heightConstraint = { ideal: 3840 };
+                }
+
+                const constraints = {
+                    video: {
+                        facingMode: useFrontCamera ? "user" : "environment",
+                        width: widthConstraint,
+                        height: heightConstraint
+                    },
+                    audio: true
+                };
+
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoEl = document.getElementById("videoElement");
+                videoEl.srcObject = mediaStream;
+                videoEl.classList.remove("hidden");
+                document.getElementById("imagePreview").classList.add("hidden");
+                document.getElementById("videoPreview").classList.add("hidden");
+
+                setZoom(currentZoom, null);
+            } catch (err) {
+                console.warn("Camera access fallback:", err);
+            }
+        }
+
+        function changeResolution() {
+            currentResolutionSetting = document.getElementById("resolutionSelector").value;
+            initCamera();
+        }
+
+        async function setZoom(zoomValue, btn) {
+            currentZoom = zoomValue;
+            document.getElementById("currentZoomLabel").innerText = zoomValue.toFixed(1) + "x";
+
+            if (btn) {
+                document.querySelectorAll(".zoom-btn").forEach(b => {
+                    b.className = "zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 transition";
+                });
+                btn.className = "zoom-btn flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-weddingRed text-weddingGold shadow transition";
+            }
+
+            if (mediaStream) {
+                const track = mediaStream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                if (capabilities.zoom) {
+                    try {
+                        const targetZoom = Math.min(Math.max(zoomValue, capabilities.zoom.min || 1), capabilities.zoom.max || 10);
+                        await track.applyConstraints({ advanced: [{ zoom: targetZoom }] });
+                    } catch (e) {
+                        console.warn("Hardware zoom constraint failed, using visual scale:", e);
+                    }
+                }
+            }
+
+            // Visual zoom scale mapping for high zoom multipliers up to 100x
+            const videoEl = document.getElementById("videoElement");
+            let visualScale = 1.0;
+            if (zoomValue === 0.5) visualScale = 0.8;
+            else if (zoomValue === 1.0) visualScale = 1.0;
+            else visualScale = 1.0 + (zoomValue - 1.0) * 0.15; // Smooth proportional scaling
+
+            videoEl.style.transform = `scale(${visualScale})`;
+        }
+
+        function toggleCameraFacing() {
+            useFrontCamera = !useFrontCamera;
+            initCamera();
+        }
+
+        function applyFilter(filterClass, btn) {
+            currentFilter = filterClass;
+            document.querySelectorAll(".filter-btn").forEach(b => {
+                b.classList.remove("border-2", "border-weddingGold", "bg-amber-50", "font-bold");
+                b.classList.add("border", "border-gray-200", "font-medium");
+            });
+            btn.classList.add("border-2", "border-weddingGold", "bg-amber-50", "font-bold");
+            btn.classList.remove("border-gray-200", "font-medium");
+
+            const videoEl = document.getElementById("videoElement");
+            const previewEl = document.getElementById("imagePreview");
+            videoEl.className = `w-full h-full object-cover transition-transform duration-200 ${filterClass}`;
+            previewEl.className = `w-full h-full object-contain bg-black ${filterClass}`;
+        }
+
+        function updateFiltersForEvent() {
+            const ev = document.getElementById("eventSelector").value;
+            const badge = document.getElementById("recommendedBadge");
+            if(ev.includes("Hindu Wedding") || ev.includes("Christian Wedding") || ev.includes("Sagai")) {
+                badge.innerText = "⭐ Recommended: Royal Gold / Cinematic";
+            } else if(ev.includes("Haldi") || ev.includes("Mehndi")) {
+                badge.innerText = "⭐ Recommended: Golden Hour / Vibrant";
+            } else {
+                badge.innerText = "⭐ Recommended: Sunset Warm";
             }
         }
 
         function capturePhoto() {
             const video = document.getElementById("videoElement");
             const canvas = document.getElementById("canvasElement");
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
+            canvas.width = video.videoWidth || 1080;
+            canvas.height = video.videoHeight || 1440;
             const ctx = canvas.getContext("2d");
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const url = canvas.toDataURL("image/jpeg", 0.8);
-            photos.unshift({ name: currentUser.name, url: url });
-            localStorage.setItem("wedding_photos", JSON.stringify(photos));
-            alert("Photo captured and saved!");
-            renderGallery();
-            switchTab("gallery");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const shotTimestamp = new Date().toLocaleString();
+            currentHashtag = getRandomHashtag();
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(30, canvas.height - 140, canvas.width - 60, 110);
+            ctx.fillStyle = "#D4AF37";
+            ctx.font = "bold 32px 'Playfair Display', serif";
+            ctx.fillText("Gunjan & Henri", 60, canvas.height - 90);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillText(`Guest: ${currentUser.name} • ${currentHashtag}`, 60, canvas.height - 55);
+            ctx.fillText(`Shot: ${shotTimestamp}`, 60, canvas.height - 25);
+
+            canvas.toBlob((blob) => {
+                capturedBlob = blob;
+                isVideoMode = false;
+                const imageUrl = URL.createObjectURL(blob);
+                const preview = document.getElementById("imagePreview");
+                preview.src = imageUrl;
+                preview.classList.remove("hidden");
+                video.classList.add("hidden");
+                document.getElementById("videoPreview").classList.add("hidden");
+
+                document.getElementById("captureControls").classList.add("hidden");
+                document.getElementById("retakeControls").classList.remove("hidden");
+            }, "image/jpeg", 0.90);
+        }
+
+        function toggleVideoRecording() {
+            const btn = document.getElementById("recordVideoBtn");
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                recordedChunks = [];
+                try {
+                    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+                } catch(e) {
+                    try { mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/mp4' }); }
+                    catch(err) { mediaRecorder = new MediaRecorder(mediaStream); }
+                }
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) recordedChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    capturedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                    isVideoMode = true;
+                    currentHashtag = getRandomHashtag();
+
+                    const videoUrl = URL.createObjectURL(capturedBlob);
+                    const vPreview = document.getElementById("videoPreview");
+                    vPreview.src = videoUrl;
+                    vPreview.classList.remove("hidden");
+                    document.getElementById("videoElement").classList.add("hidden");
+                    document.getElementById("imagePreview").classList.add("hidden");
+                    document.getElementById("recordingBadge").classList.add("hidden");
+
+                    document.getElementById("captureControls").classList.add("hidden");
+                    document.getElementById("retakeControls").classList.remove("hidden");
+                };
+
+                mediaRecorder.start();
+                btn.innerHTML = `<i class="fa-solid fa-stop mr-2"></i> Stop Recording`;
+                btn.className = "py-3.5 bg-red-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center text-sm tracking-wide";
+                document.getElementById("recordingBadge").classList.remove("hidden");
+            } else {
+                mediaRecorder.stop();
+                btn.innerHTML = `<i class="fa-solid fa-video mr-2 text-lg"></i> Record Video`;
+                btn.className = "py-3.5 bg-weddingGold text-weddingRed font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide";
+            }
         }
 
         function handleFileUpload(e) {
             const files = e.target.files;
             if(!files || files.length === 0) return;
+            const eventName = document.getElementById("eventSelector").value;
+
             Array.from(files).forEach(file => {
+                const shotDate = file.lastModified ? new Date(file.lastModified) : new Date();
+                const shotTimestamp = shotDate.toLocaleString();
+                const isVid = file.type.startsWith('video');
+                const fileHashtag = getRandomHashtag();
+
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onloadend = function() {
-                    photos.unshift({ name: currentUser.name, url: reader.result });
-                    localStorage.setItem("wedding_photos", JSON.stringify(photos));
-                    renderGallery();
+                    const base64data = reader.result;
+                    if(isVid) {
+                        saveMediaToStorage({
+                            id: Date.now() + Math.random(),
+                            url: base64data,
+                            type: 'video',
+                            name: currentUser.name,
+                            event: eventName,
+                            timestamp: shotTimestamp,
+                            hashtag: fileHashtag,
+                            likes: 0,
+                            comments: []
+                        });
+                    } else {
+                        const img = new Image();
+                        img.src = base64data;
+                        img.onload = function() {
+                            const canvas = document.createElement("canvas");
+                            const MAX_WIDTH = 1200;
+                            const MAX_HEIGHT = 1600;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext("2d");
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                            ctx.fillRect(20, canvas.height - 100, canvas.width - 40, 80);
+                            ctx.fillStyle = "#D4AF37";
+                            ctx.font = "bold 24px 'Playfair Display', serif";
+                            ctx.fillText("Gunjan & Henri", 40, canvas.height - 65);
+                            ctx.fillStyle = "#FFFFFF";
+                            ctx.font = "16px 'Plus Jakarta Sans', sans-serif";
+                            ctx.fillText(`Guest: ${currentUser.name} • ${fileHashtag}`, 40, canvas.height - 40);
+                            ctx.fillText(`Shot: ${shotTimestamp}`, 40, canvas.height - 18);
+
+                            const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+                            saveMediaToStorage({
+                                id: Date.now() + Math.random(),
+                                url: compressedUrl,
+                                type: 'image',
+                                name: currentUser.name,
+                                event: eventName,
+                                timestamp: shotTimestamp,
+                                hashtag: fileHashtag,
+                                likes: 0,
+                                comments: []
+                            });
+                        };
+                    }
                 };
             });
-            alert("Uploaded successfully!");
-            switchTab("gallery");
+
+            alert(`${files.length} file(s) processed and added to gallery!`);
+            switchTab('gallery');
+        }
+
+        function saveMediaToStorage(mediaObj) {
+            try {
+                photos.unshift(mediaObj);
+                localStorage.setItem("wedding_photos", JSON.stringify(photos));
+                renderGallery();
+                updateAdminStats();
+
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        filename: `Wedding_${currentUser.name}_${Date.now()}.${mediaObj.type === 'video' ? 'webm' : 'jpg'}`,
+                        mimeType: mediaObj.type === 'video' ? 'video/webm' : 'image/jpeg',
+                        fileData: mediaObj.url.split(',')[1],
+                        event: mediaObj.event,
+                        guest: mediaObj.name
+                    })
+                }).catch(err => console.error("Drive sync note:", err));
+            } catch (err) {
+                alert("Storage limit reached. Please clear some space or upload smaller files.");
+                console.error("Storage error:", err);
+            }
+        }
+
+        function retakePhoto() {
+            capturedBlob = null;
+            isVideoMode = false;
+            currentHashtag = getRandomHashtag();
+            document.getElementById("watermarkHashtag").innerText = `${currentHashtag} • Gunjan & Henri`;
+
+            document.getElementById("imagePreview").classList.add("hidden");
+            document.getElementById("videoPreview").classList.add("hidden");
+            document.getElementById("videoElement").classList.remove("hidden");
+            document.getElementById("recordingBadge").classList.add("hidden");
+            document.getElementById("captureControls").classList.remove("hidden");
+            document.getElementById("retakeControls").classList.add("hidden");
+        }
+
+        async function confirmAndUpload() {
+            if(!capturedBlob) return;
+            const eventName = document.getElementById("eventSelector").value;
+            const shotTimestamp = new Date().toLocaleString();
+            const savedHashtag = currentHashtag;
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(capturedBlob);
+            reader.onloadend = async function() {
+                const base64data = reader.result;
+                const mediaObj = {
+                    id: Date.now(),
+                    url: base64data,
+                    type: isVideoMode ? 'video' : 'image',
+                    name: currentUser.name,
+                    event: eventName,
+                    timestamp: shotTimestamp,
+                    hashtag: savedHashtag,
+                    likes: 0,
+                    comments: []
+                };
+
+                saveMediaToStorage(mediaObj);
+                alert("Media saved and synced successfully!");
+                retakePhoto();
+                switchTab('gallery');
+            };
         }
 
         function renderGallery() {
+            const filterEv = document.getElementById("galleryFilterEvent").value;
             const grid = document.getElementById("galleryGrid");
             grid.innerHTML = "";
-            document.getElementById("photoCountBadge").innerText = `${photos.length} Media Items`;
-            photos.forEach(p => {
+
+            const filtered = filterEv === "all" ? photos : photos.filter(p => p.event === filterEv);
+            document.getElementById("photoCountBadge").innerText = `${filtered.length} Media Items`;
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-sm">No media uploaded for this event yet. Be the first to add one!</div>`;
+                return;
+            }
+
+            filtered.forEach((p) => {
                 const div = document.createElement("div");
-                div.className = "bg-black rounded-lg overflow-hidden aspect-[3/4]";
-                div.innerHTML = `<img src="${p.url}" class="w-full h-full object-cover">`;
+                div.className = "relative bg-black rounded-xl overflow-hidden shadow aspect-[3/4] cursor-pointer group";
+                div.onclick = () => openLightbox(photos.indexOf(p));
+                
+                let mediaContent = `<img src="${p.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`;
+                if(p.type === 'video') {
+                    mediaContent = `
+                        <video src="${p.url}" class="w-full h-full object-cover"></video>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30"><i class="fa-solid fa-circle-play text-white text-3xl"></i></div>
+                    `;
+                }
+
+                div.innerHTML = `
+                    ${mediaContent}
+                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-[10px]">
+                        <p class="font-bold truncate text-weddingGold">${p.name} • <span class="text-white">${p.hashtag || '#FenryWithHisGun'}</span></p>
+                        <p class="text-gray-300 truncate">${p.event}</p>
+                        <div class="flex justify-between mt-1 text-[9px]">
+                            <span><i class="fa-solid fa-heart text-rose-400 mr-0.5"></i> ${p.likes}</span>
+                            <span><i class="fa-solid fa-comment text-sky-400 mr-0.5"></i> ${p.comments.length}</span>
+                        </div>
+                    </div>
+                `;
                 grid.appendChild(div);
             });
         }
 
-        function renderItinerary() {
-            const list = document.getElementById("itineraryList");
-            list.innerHTML = `
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 9:</strong> Welcome Dinner</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 10:</strong> Shopping & Mehndi Night</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 11:</strong> Sagai & Ring Ceremony</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 12:</strong> Haldi Ceremony</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 13:</strong> Sangeet Night</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 14:</strong> Hindu Wedding & Pheras</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 15:</strong> Grand Reception</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 16:</strong> Family Farewell</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 17:</strong> Christian Wedding Ceremony</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 18:</strong> Celebration & Pre-Departure</div>
-                <div class="bg-white p-3 rounded-lg border"><strong>Oct 19:</strong> Finland Celebration</div>
-            `;
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const p = photos[index];
+            const imgEl = document.getElementById("lightboxImage");
+            const vidEl = document.getElementById("lightboxVideo");
+
+            if(p.type === 'video') {
+                imgEl.classList.add("hidden");
+                vidEl.src = p.url;
+                vidEl.classList.remove("hidden");
+            } else {
+                vidEl.classList.add("hidden");
+                imgEl.src = p.url;
+                imgEl.classList.remove("hidden");
+            }
+
+            document.getElementById("lightboxCaption").innerText = `${p.name} • ${p.hashtag || '#FenryWithHisGun'}`;
+            document.getElementById("lightboxMeta").innerText = `${p.event} • ${p.timestamp}`;
+            document.getElementById("lightboxLikes").innerText = p.likes;
+            document.getElementById("lightboxDownloadBtn").href = p.url;
+            document.getElementById("lightboxModal").classList.remove("hidden");
         }
 
-        function submitWish() {
-            const msg = document.getElementById("guestbookMessage").value;
-            if(!msg) return;
-            alert("Wish posted!");
+        function closeLightbox() {
+            document.getElementById("lightboxModal").classList.add("hidden");
+            document.getElementById("lightboxVideo").pause();
+        }
+
+        function likeCurrentPhoto() {
+            if(currentLightboxIndex !== null) {
+                photos[currentLightboxIndex].likes++;
+                localStorage.setItem("wedding_photos", JSON.stringify(photos));
+                document.getElementById("lightboxLikes").innerText = photos[currentLightboxIndex].likes;
+                renderGallery();
+            }
+        }
+
+        function renderItinerary() {
+            const list = document.getElementById("itineraryList");
+            list.innerHTML = "";
+            itineraries.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col space-y-1";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-weddingRed bg-amber-50 px-2 py-0.5 rounded">${item.day}</span>
+                        <span class="text-xs text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${item.time}</span>
+                    </div>
+                    <h4 class="font-serif font-bold text-lg text-weddingDark">${item.title}</h4>
+                    <p class="text-xs text-gray-600"><i class="fa-solid fa-location-dot text-weddingGold mr-1"></i> ${item.venue}</p>
+                    <p class="text-xs text-gray-500 italic"><i class="fa-solid fa-shirt text-gray-400 mr-1"></i> Dress Code: ${item.dress}</p>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function submitGuestbookWish() {
+            const text = document.getElementById("guestbookMessage").value.trim();
+            if(!text) return;
+            wishes.unshift({ name: currentUser.name, text: text });
+            localStorage.setItem("wedding_wishes", JSON.stringify(wishes));
             document.getElementById("guestbookMessage").value = "";
+            renderGuestbook();
+            alert("Your wish has been posted to the digital guestbook!");
+        }
+
+        function renderGuestbook() {
+            const list = document.getElementById("guestbookList");
+            list.innerHTML = "";
+            wishes.forEach(w => {
+                const card = document.createElement("div");
+                card.className = "bg-white p-3 rounded-xl shadow-sm border border-gray-200 space-y-1";
+                card.innerHTML = `
+                    <p class="font-serif font-bold text-sm text-weddingRed">${w.name}</p>
+                    <p class="text-xs text-weddingDark">${w.text}</p>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function updateAdminStats() {
+            document.getElementById("adminTotalPhotos").innerText = photos.length;
+            const totalLikes = photos.reduce((acc, p) => acc + p.likes, 0);
+            document.getElementById("adminTotalLikes").innerText = totalLikes;
+            document.getElementById("adminTotalWishes").innerText = wishes.length;
+        }
+
+        let isSlideshowPlaying = true;
+        function startSlideshow() {
+            if(photos.length === 0) {
+                document.getElementById("slideshowImage").src = "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80";
+                document.getElementById("slideshowCaption").innerText = "Gunjan & Henri Wedding Celebration";
+                document.getElementById("slideshowMeta").innerText = "October 9–19, 2026";
+                return;
+            }
+            showSlide(slideshowIndex);
+            if(isSlideshowPlaying && !slideshowTimer) {
+                slideshowTimer = setInterval(() => {
+                    slideshowIndex = (slideshowIndex + 1) % photos.length;
+                    showSlide(slideshowIndex);
+                }, 4000);
+            }
+        }
+
+        function stopSlideshow() {
+            if(slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
+        }
+
+        function showSlide(idx) {
+            if(photos.length === 0) return;
+            const p = photos[idx];
+            const imgEl = document.getElementById("slideshowImage");
+            const vidEl = document.getElementById("slideshowVideo");
+
+            if(p.type === 'video') {
+                imgEl.classList.add("hidden");
+                vidEl.src = p.url;
+                vidEl.classList.remove("hidden");
+                vidEl.play();
+            } else {
+                vidEl.classList.add("hidden");
+                vidEl.pause();
+                imgEl.src = p.url;
+                imgEl.classList.remove("hidden");
+            }
+
+            document.getElementById("slideshowCaption").innerText = `${p.name} • ${p.hashtag || '#FenryWithHisGun'}`;
+            document.getElementById("slideshowMeta").innerText = `${p.event} • ${p.timestamp}`;
+        }
+
+        function nextSlide() {
+            if(photos.length === 0) return;
+            slideshowIndex = (slideshowIndex + 1) % photos.length;
+            showSlide(slideshowIndex);
+        }
+
+        function prevSlide() {
+            if(photos.length === 0) return;
+            slideshowIndex = (slideshowIndex - 1 + photos.length) % photos.length;
+            showSlide(slideshowIndex);
+        }
+
+        function toggleSlideshowPlay() {
+            isSlideshowPlaying = !isSlideshowPlaying;
+            const btn = document.getElementById("slideshowPlayBtn");
+            if(isSlideshowPlaying) {
+                btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause`;
+                startSlideshow();
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-play"></i> Play`;
+                stopSlideshow();
+            }
         }
     </script>
 </body>
