@@ -38,6 +38,10 @@
         .filter-soft { filter: brightness(1.1) blur(0.2px) saturate(0.9); }
         .filter-matte { filter: contrast(0.9) brightness(1.05) saturate(0.9); }
         .filter-dramatic { filter: contrast(1.4) brightness(0.9) saturate(1.2); }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        .animate-pulse-slow { animation: pulse-slow 2s infinite; }
     </style>
 </head>
 <body class="bg-weddingCream text-weddingDark h-full flex flex-col selection:bg-weddingGold selection:text-white">
@@ -98,11 +102,11 @@
         <!-- CONTENT AREA -->
         <main class="flex-1 overflow-y-auto relative bg-weddingCream p-4">
 
-            <!-- TAB 1: CAMERA -->
+            <!-- TAB 1: CAMERA & VIDEO -->
             <section id="tab-camera" class="space-y-4 max-w-lg mx-auto pb-10">
                 <!-- Event Selector -->
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Current Event / Ceremony:</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Current Event / Wedding Date:</label>
                     <select id="eventSelector" onchange="updateFiltersForEvent()" class="w-full p-2.5 rounded-lg border border-gray-300 font-semibold text-weddingDark bg-weddingCream focus:outline-none focus:border-weddingGold">
                         <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
                         <option value="Shopping & Mehndi Night (Oct 10)">Shopping & Mehndi Night (Oct 10)</option>
@@ -112,6 +116,8 @@
                         <option value="Hindu Wedding & Pheras (Oct 14)" selected>Hindu Wedding & Pheras (Oct 14)</option>
                         <option value="Grand Reception (Oct 15)">Grand Reception (Oct 15)</option>
                         <option value="Family Farewell (Oct 16)">Family Farewell (Oct 16)</option>
+                        <option value="Christian Wedding Ceremony (Oct 17)">Christian Wedding Ceremony (Oct 17)</option>
+                        <option value="Celebration & Pre-Departure (Oct 18)">Celebration & Pre-Departure (Oct 18)</option>
                         <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
                     </select>
                 </div>
@@ -121,7 +127,13 @@
                     <video id="videoElement" autoplay playsinline class="w-full h-full object-cover"></video>
                     <canvas id="canvasElement" class="hidden"></canvas>
                     <img id="imagePreview" class="hidden w-full h-full object-contain bg-black" alt="Captured Photo">
+                    <video id="videoPreview" class="hidden w-full h-full object-contain bg-black" controls></video>
                     
+                    <!-- Recording Indicator Badge -->
+                    <div id="recordingBadge" class="hidden absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-lg animate-pulse">
+                        <i class="fa-solid fa-circle mr-1.5 text-[8px]"></i> Recording Video...
+                    </div>
+
                     <!-- Watermark Overlay Badge on viewfinder -->
                     <div class="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-sm text-white p-2.5 rounded-xl text-xs flex justify-between items-center pointer-events-none border border-white/20">
                         <div>
@@ -132,18 +144,18 @@
                     </div>
                 </div>
 
-                <!-- File Upload Fallback -->
+                <!-- Multiple File Upload Fallback -->
                 <div class="flex items-center justify-center space-x-2">
                     <label class="cursor-pointer bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
-                        <i class="fa-solid fa-upload mr-2 text-weddingRed"></i> Upload from Device
-                        <input type="file" accept="image/*" onchange="handleFileUpload(event)" class="hidden">
+                        <i class="fa-solid fa-upload mr-2 text-weddingRed"></i> Upload Media (Auto-Shot Timestamps)
+                        <input type="file" accept="image/*,video/*" multiple onchange="handleFileUpload(event)" class="hidden">
                     </label>
                     <button id="switchCameraBtn" onclick="toggleCameraFacing()" class="bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
-                        <i class="fa-solid fa-camera-rotate mr-2 text-weddingRed"></i> Switch Camera
+                        <i class="fa-solid fa-camera-rotate mr-2 text-weddingRed"></i> Switch
                     </button>
                 </div>
 
-                <!-- Filter Selector (10+ Tailored Filters) -->
+                <!-- Filter Selector -->
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-bold text-gray-500 uppercase">Tailored Event Filters</span>
@@ -163,10 +175,13 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div id="captureControls" class="flex space-x-3">
-                    <button onclick="capturePhoto()" class="flex-1 py-4 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-base tracking-wide">
-                        <i class="fa-solid fa-camera mr-2 text-xl"></i> Snap HD Photo
+                <!-- Action Buttons: Snap Photo & Record Video -->
+                <div id="captureControls" class="grid grid-cols-2 gap-3">
+                    <button onclick="capturePhoto()" class="py-3.5 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide">
+                        <i class="fa-solid fa-camera mr-2 text-lg"></i> Snap Photo
+                    </button>
+                    <button id="recordVideoBtn" onclick="toggleVideoRecording()" class="py-3.5 bg-weddingGold text-weddingRed font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide">
+                        <i class="fa-solid fa-video mr-2 text-lg"></i> Record Video
                     </button>
                 </div>
                 <div id="retakeControls" class="hidden flex space-x-3">
@@ -184,20 +199,22 @@
                 <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-200">
                     <select id="galleryFilterEvent" onchange="renderGallery()" class="text-xs font-bold p-2 rounded-lg border border-gray-300 bg-weddingCream text-weddingDark">
                         <option value="all">All Events Gallery</option>
-                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner</option>
-                        <option value="Shopping & Mehndi Night (Oct 10)">Mehndi Night</option>
-                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai</option>
-                        <option value="Haldi Ceremony (Oct 12)">Haldi</option>
-                        <option value="Sangeet Night (Oct 13)">Sangeet</option>
-                        <option value="Hindu Wedding & Pheras (Oct 14)">Hindu Wedding</option>
-                        <option value="Grand Reception (Oct 15)">Reception</option>
-                        <option value="Family Farewell (Oct 16)">Farewell</option>
-                        <option value="Finland Celebration (Oct 19)">Finland Celebration</option>
+                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
+                        <option value="Shopping & Mehndi Night (Oct 10)">Mehndi Night (Oct 10)</option>
+                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai (Oct 11)</option>
+                        <option value="Haldi Ceremony (Oct 12)">Haldi (Oct 12)</option>
+                        <option value="Sangeet Night (Oct 13)">Sangeet (Oct 13)</option>
+                        <option value="Hindu Wedding & Pheras (Oct 14)">Hindu Wedding (Oct 14)</option>
+                        <option value="Grand Reception (Oct 15)">Reception (Oct 15)</option>
+                        <option value="Family Farewell (Oct 16)">Farewell (Oct 16)</option>
+                        <option value="Christian Wedding Ceremony (Oct 17)">Christian Wedding (Oct 17)</option>
+                        <option value="Celebration & Pre-Departure (Oct 18)">Pre-Departure (Oct 18)</option>
+                        <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
                     </select>
-                    <span id="photoCountBadge" class="text-xs font-bold text-weddingRed">0 Photos</span>
+                    <span id="photoCountBadge" class="text-xs font-bold text-weddingRed">0 Media Items</span>
                 </div>
                 <div id="galleryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <!-- Dynamic Photos Loaded Here -->
+                    <!-- Dynamic Media Loaded Here -->
                 </div>
             </section>
 
@@ -205,6 +222,7 @@
             <section id="tab-slideshow" class="hidden space-y-4 text-center pb-10">
                 <div class="bg-black rounded-2xl overflow-hidden shadow-xl relative aspect-[4/3] flex items-center justify-center">
                     <img id="slideshowImage" src="" class="w-full h-full object-contain" alt="Slideshow">
+                    <video id="slideshowVideo" src="" class="hidden w-full h-full object-contain" autoplay muted loop></video>
                     <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md text-white p-3 rounded-xl text-left border border-white/20">
                         <p id="slideshowCaption" class="font-bold text-weddingGold text-sm">--</p>
                         <p id="slideshowMeta" class="text-xs text-gray-300">--</p>
@@ -223,9 +241,7 @@
                     <h3 class="font-serif text-2xl font-bold text-weddingRed">10-Day Event Itinerary</h3>
                     <p class="text-xs text-gray-500">October 9–19, 2026 • India & Finland</p>
                 </div>
-                <div class="space-y-3" id="itineraryList">
-                    <!-- Injected itinerary items -->
-                </div>
+                <div class="space-y-3" id="itineraryList"></div>
             </section>
 
             <!-- TAB 5: GUESTBOOK -->
@@ -235,9 +251,7 @@
                     <textarea id="guestbookMessage" rows="3" placeholder="Write your heartfelt wishes here..." class="w-full p-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-weddingGold bg-weddingCream mb-2"></textarea>
                     <button onclick="submitGuestbookWish()" class="w-full py-2.5 bg-weddingRed text-weddingGold font-bold rounded-xl text-sm shadow">Post to Digital Guestbook</button>
                 </div>
-                <div id="guestbookList" class="space-y-3">
-                    <!-- Dynamic wishes -->
-                </div>
+                <div id="guestbookList" class="space-y-3"></div>
             </section>
 
             <!-- TAB 6: ADMIN PANEL -->
@@ -249,7 +263,7 @@
                     <div class="grid grid-cols-3 gap-3 mb-4">
                         <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
                             <p id="adminTotalPhotos" class="text-2xl font-bold text-weddingRed">0</p>
-                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Photos</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Media</p>
                         </div>
                         <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
                             <p id="adminTotalLikes" class="text-2xl font-bold text-weddingRed">0</p>
@@ -278,7 +292,8 @@
     <!-- LIGHTBOX MODAL -->
     <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
         <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-2xl px-3 py-1 bg-white/20 rounded-full"><i class="fa-solid fa-xmark"></i></button>
-        <img id="lightboxImage" src="" class="max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain">
+        <img id="lightboxImage" src="" class="hidden max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain">
+        <video id="lightboxVideo" src="" class="hidden max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain" controls autoplay></video>
         <div class="bg-white/10 backdrop-blur-md text-white p-3 rounded-xl max-w-md w-full flex justify-between items-center border border-white/20">
             <div>
                 <p id="lightboxCaption" class="font-bold text-weddingGold text-sm">--</p>
@@ -286,14 +301,14 @@
             </div>
             <div class="flex space-x-3">
                 <button onclick="likeCurrentPhoto()" class="text-rose-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-heart"></i> <span id="lightboxLikes" class="text-xs">0</span></button>
-                <a id="lightboxDownloadBtn" download="wedding-photo.jpg" class="text-weddingGold hover:text-white text-xl"><i class="fa-solid fa-download"></i></a>
+                <a id="lightboxDownloadBtn" download="wedding-media.jpg" class="text-weddingGold hover:text-white text-xl"><i class="fa-solid fa-download"></i></a>
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMmt0kPZzqk2DWZXc2z5Lbk-fJR0SxXzANf12pmJdi8NyjzF1IMjpmVRZsY49S5fFZA/exec"; //[span_0](start_span)[span_0](end_span)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMmt0kPZzqk2DWZXc2z5Lbk-fJR0SxXzANf12pmJdi8NyjzF1IMjpmVRZsY49S5fFZA/exec";
         const PASSCODE_CORRECT = "17102026";
         
         let currentUser = { name: "", role: "Guest" };
@@ -301,6 +316,9 @@
         let mediaStream = null;
         let useFrontCamera = false;
         let capturedBlob = null;
+        let isVideoMode = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
         let photos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
         let wishes = JSON.parse(localStorage.getItem("wedding_wishes") || '[{"name": "Ritika Kanojia", "text": "Wishing you both a lifetime of love and joy! #FenryWithHisGun"}]');
         let currentLightboxIndex = null;
@@ -316,10 +334,11 @@
             { day: "Oct 14, 2026", title: "Hindu Wedding & Pheras", time: "5:00 PM onwards", venue: "Mandap Lawns", dress: "Traditional Indian Wedding Attire" },
             { day: "Oct 15, 2026", title: "Grand Reception", time: "7:30 PM onwards", venue: "Grand Ballroom", dress: "Black Tie / Formal Indo-Western" },
             { day: "Oct 16, 2026", title: "Family Farewell Brunch", time: "11:00 AM onwards", venue: "Garden Restaurant", dress: "Relaxed Day Wear" },
+            { day: "Oct 17, 2026", title: "Christian Wedding Ceremony", time: "2:00 PM onwards", venue: "Chapel & Gardens", dress: "Formal Wedding Attire" },
+            { day: "Oct 18, 2026", title: "Celebration & Pre-Departure", time: "6:00 PM onwards", venue: "Banquet Hall", dress: "Smart Casual" },
             { day: "Oct 19, 2026", title: "Finland Celebration", time: "4:00 PM onwards", venue: "Helsinki Reception Hall", dress: "Nordic Formal / Smart Elegance" }
         ];
 
-        // Funny hints rotation
         const hints = [
             "Hint: The grand wedding date (DDMMYYYY)",
             "Hint: 17th October 2026 written compactly",
@@ -366,9 +385,7 @@
         }
 
         function logout() {
-            if(mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-            }
+            if(mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             location.reload();
         }
 
@@ -388,14 +405,15 @@
         async function initCamera() {
             try {
                 if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-                const constraints = { video: { facingMode: useFrontCamera ? "user" : "environment" }, audio: false };
+                const constraints = { video: { facingMode: useFrontCamera ? "user" : "environment" }, audio: true };
                 mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
                 const videoEl = document.getElementById("videoElement");
                 videoEl.srcObject = mediaStream;
                 videoEl.classList.remove("hidden");
                 document.getElementById("imagePreview").classList.add("hidden");
+                document.getElementById("videoPreview").classList.add("hidden");
             } catch (err) {
-                console.warn("Camera access fallback to file upload:", err);
+                console.warn("Camera access fallback:", err);
             }
         }
 
@@ -422,7 +440,7 @@
         function updateFiltersForEvent() {
             const ev = document.getElementById("eventSelector").value;
             const badge = document.getElementById("recommendedBadge");
-            if(ev.includes("Hindu Wedding") || ev.includes("Sagai")) {
+            if(ev.includes("Hindu Wedding") || ev.includes("Christian Wedding") || ev.includes("Sagai")) {
                 badge.innerText = "⭐ Recommended: Royal Gold / Cinematic";
             } else if(ev.includes("Haldi") || ev.includes("Mehndi")) {
                 badge.innerText = "⭐ Recommended: Golden Hour / Vibrant";
@@ -438,50 +456,158 @@
             canvas.height = video.videoHeight || 1440;
             const ctx = canvas.getContext("2d");
 
-            // Apply filter style on canvas context if needed
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const shotTimestamp = new Date().toLocaleString();
 
-            // Add dynamic HD Watermark stamp on canvas
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(30, canvas.height - 120, canvas.width - 60, 90);
+            ctx.fillRect(30, canvas.height - 140, canvas.width - 60, 110);
             ctx.fillStyle = "#D4AF37";
             ctx.font = "bold 32px 'Playfair Display', serif";
-            ctx.fillText("Gunjan & Henri", 60, canvas.height - 75);
+            ctx.fillText("Gunjan & Henri", 60, canvas.height - 90);
             ctx.fillStyle = "#FFFFFF";
-            ctx.font = "22px 'Plus Jakarta Sans', sans-serif";
-            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 40);
+            ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 55);
+            ctx.fillText(`Shot: ${shotTimestamp}`, 60, canvas.height - 25);
 
             canvas.toBlob((blob) => {
                 capturedBlob = blob;
+                isVideoMode = false;
                 const imageUrl = URL.createObjectURL(blob);
                 const preview = document.getElementById("imagePreview");
                 preview.src = imageUrl;
                 preview.classList.remove("hidden");
-                video.classList.add("hidden");
+                document.getElementById("videoElement").classList.add("hidden");
+                document.getElementById("videoPreview").classList.add("hidden");
 
                 document.getElementById("captureControls").classList.add("hidden");
                 document.getElementById("retakeControls").classList.remove("hidden");
             }, "image/jpeg", 0.95);
         }
 
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            capturedBlob = file;
-            const imageUrl = URL.createObjectURL(file);
-            const preview = document.getElementById("imagePreview");
-            preview.src = imageUrl;
-            preview.classList.remove("hidden");
-            document.getElementById("videoElement").classList.add("hidden");
+        function toggleVideoRecording() {
+            const btn = document.getElementById("recordVideoBtn");
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                recordedChunks = [];
+                try {
+                    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+                } catch(e) {
+                    try { mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/mp4' }); }
+                    catch(err) { mediaRecorder = new MediaRecorder(mediaStream); }
+                }
 
-            document.getElementById("captureControls").classList.add("hidden");
-            document.getElementById("retakeControls").classList.remove("hidden");
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) recordedChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    capturedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                    isVideoMode = true;
+                    const videoUrl = URL.createObjectURL(capturedBlob);
+                    const vPreview = document.getElementById("videoPreview");
+                    vPreview.src = videoUrl;
+                    vPreview.classList.remove("hidden");
+                    document.getElementById("videoElement").classList.add("hidden");
+                    document.getElementById("imagePreview").classList.add("hidden");
+                    document.getElementById("recordingBadge").classList.add("hidden");
+
+                    document.getElementById("captureControls").classList.add("hidden");
+                    document.getElementById("retakeControls").classList.remove("hidden");
+                };
+
+                mediaRecorder.start();
+                btn.innerHTML = `<i class="fa-solid fa-stop mr-2"></i> Stop Recording`;
+                btn.className = "py-3.5 bg-red-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center text-sm tracking-wide";
+                document.getElementById("recordingBadge").classList.remove("hidden");
+            } else {
+                mediaRecorder.stop();
+                btn.innerHTML = `<i class="fa-solid fa-video mr-2 text-lg"></i> Record Video`;
+                btn.className = "py-3.5 bg-weddingGold text-weddingRed font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-sm tracking-wide";
+            }
+        }
+
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            if(!files || files.length === 0) return;
+            const eventName = document.getElementById("eventSelector").value;
+
+            Array.from(files).forEach(file => {
+                const shotDate = file.lastModified ? new Date(file.lastModified) : new Date();
+                const shotTimestamp = shotDate.toLocaleString();
+                const isVid = file.type.startsWith('video');
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function() {
+                    const base64data = reader.result;
+                    if(isVid) {
+                        const mediaObj = {
+                            id: Date.now() + Math.random(),
+                            url: base64data,
+                            type: 'video',
+                            name: currentUser.name,
+                            event: eventName,
+                            timestamp: shotTimestamp,
+                            likes: 0,
+                            comments: []
+                        };
+                        photos.unshift(mediaObj);
+                        localStorage.setItem("wedding_photos", JSON.stringify(photos));
+                        renderGallery();
+                        updateAdminStats();
+                    } else {
+                        const img = new Image();
+                        img.src = base64data;
+                        img.onload = function() {
+                            const canvas = document.createElement("canvas");
+                            canvas.width = img.width || 1080;
+                            canvas.height = img.height || 1440;
+                            const ctx = canvas.getContext("2d");
+
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                            ctx.fillRect(30, canvas.height - 140, canvas.width - 60, 110);
+                            ctx.fillStyle = "#D4AF37";
+                            ctx.font = "bold 32px 'Playfair Display', serif";
+                            ctx.fillText("Gunjan & Henri", 60, canvas.height - 90);
+                            ctx.fillStyle = "#FFFFFF";
+                            ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
+                            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 55);
+                            ctx.fillText(`Shot: ${shotTimestamp}`, 60, canvas.height - 25);
+
+                            const watermarkedUrl = canvas.toDataURL("image/jpeg", 0.95);
+
+                            const photoObj = {
+                                id: Date.now() + Math.random(),
+                                url: watermarkedUrl,
+                                type: 'image',
+                                name: currentUser.name,
+                                event: eventName,
+                                timestamp: shotTimestamp,
+                                likes: 0,
+                                comments: []
+                            };
+
+                            photos.unshift(photoObj);
+                            localStorage.setItem("wedding_photos", JSON.stringify(photos));
+                            renderGallery();
+                            updateAdminStats();
+                        };
+                    }
+                };
+            });
+
+            alert(`${files.length} media file(s) uploaded successfully!`);
+            switchTab('gallery');
         }
 
         function retakePhoto() {
             capturedBlob = null;
+            isVideoMode = false;
             document.getElementById("imagePreview").classList.add("hidden");
+            document.getElementById("videoPreview").classList.add("hidden");
             document.getElementById("videoElement").classList.remove("hidden");
+            document.getElementById("recordingBadge").classList.add("hidden");
             document.getElementById("captureControls").classList.remove("hidden");
             document.getElementById("retakeControls").classList.add("hidden");
         }
@@ -489,25 +615,26 @@
         async function confirmAndUpload() {
             if(!capturedBlob) return;
             const eventName = document.getElementById("eventSelector").value;
+            const shotTimestamp = new Date().toLocaleString();
             
             const reader = new FileReader();
             reader.readAsDataURL(capturedBlob);
             reader.onloadend = async function() {
                 const base64data = reader.result;
-                const photoObj = {
+                const mediaObj = {
                     id: Date.now(),
                     url: base64data,
+                    type: isVideoMode ? 'video' : 'image',
                     name: currentUser.name,
                     event: eventName,
-                    timestamp: new Date().toLocaleString(),
+                    timestamp: shotTimestamp,
                     likes: 0,
                     comments: []
                 };
 
-                photos.unshift(photoObj);
+                photos.unshift(mediaObj);
                 localStorage.setItem("wedding_photos", JSON.stringify(photos));
 
-                // Sync to Google Drive via Apps Script Web App Endpoint[span_1](start_span)[span_1](end_span)
                 try {
                     document.getElementById("syncStatus").innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing to Drive...`;
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -515,8 +642,8 @@
                         mode: "no-cors",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            filename: `Wedding_${currentUser.name}_${Date.now()}.jpg`,
-                            mimeType: "image/jpeg",
+                            filename: `Wedding_${currentUser.name}_${Date.now()}.${isVideoMode ? 'webm' : 'jpg'}`,
+                            mimeType: isVideoMode ? 'video/webm' : 'image/jpeg',
                             fileData: base64data.split(',')[1],
                             event: eventName,
                             guest: currentUser.name
@@ -527,7 +654,7 @@
                     console.error("Google Drive sync note:", e);
                 }
 
-                alert("Photo captured, watermarked, saved, and synced successfully!");
+                alert("Media captured, saved, and synced successfully!");
                 retakePhoto();
                 switchTab('gallery');
                 renderGallery();
@@ -540,19 +667,28 @@
             grid.innerHTML = "";
 
             const filtered = filterEv === "all" ? photos : photos.filter(p => p.event === filterEv);
-            document.getElementById("photoCountBadge").innerText = `${filtered.length} Photos`;
+            document.getElementById("photoCountBadge").innerText = `${filtered.length} Media Items`;
 
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-sm">No photos uploaded for this event yet. Be the first to snap one!</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-sm">No media uploaded for this event yet. Be the first to add one!</div>`;
                 return;
             }
 
-            filtered.forEach((p, idx) => {
+            filtered.forEach((p) => {
                 const div = document.createElement("div");
                 div.className = "relative bg-black rounded-xl overflow-hidden shadow aspect-[3/4] cursor-pointer group";
                 div.onclick = () => openLightbox(photos.indexOf(p));
+                
+                let mediaContent = `<img src="${p.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`;
+                if(p.type === 'video') {
+                    mediaContent = `
+                        <video src="${p.url}" class="w-full h-full object-cover"></video>
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30"><i class="fa-solid fa-circle-play text-white text-3xl"></i></div>
+                    `;
+                }
+
                 div.innerHTML = `
-                    <img src="${p.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    ${mediaContent}
                     <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-[10px]">
                         <p class="font-bold truncate text-weddingGold">${p.name}</p>
                         <p class="text-gray-300 truncate">${p.event}</p>
@@ -569,7 +705,19 @@
         function openLightbox(index) {
             currentLightboxIndex = index;
             const p = photos[index];
-            document.getElementById("lightboxImage").src = p.url;
+            const imgEl = document.getElementById("lightboxImage");
+            const vidEl = document.getElementById("lightboxVideo");
+
+            if(p.type === 'video') {
+                imgEl.classList.add("hidden");
+                vidEl.src = p.url;
+                vidEl.classList.remove("hidden");
+            } else {
+                vidEl.classList.add("hidden");
+                imgEl.src = p.url;
+                imgEl.classList.remove("hidden");
+            }
+
             document.getElementById("lightboxCaption").innerText = `${p.name} • ${p.event}`;
             document.getElementById("lightboxMeta").innerText = p.timestamp;
             document.getElementById("lightboxLikes").innerText = p.likes;
@@ -579,6 +727,7 @@
 
         function closeLightbox() {
             document.getElementById("lightboxModal").classList.add("hidden");
+            document.getElementById("lightboxVideo").pause();
         }
 
         function likeCurrentPhoto() {
@@ -653,7 +802,7 @@
                 slideshowTimer = setInterval(() => {
                     slideshowIndex = (slideshowIndex + 1) % photos.length;
                     showSlide(slideshowIndex);
-                }, 3500);
+                }, 4000);
             }
         }
 
@@ -667,7 +816,21 @@
         function showSlide(idx) {
             if(photos.length === 0) return;
             const p = photos[idx];
-            document.getElementById("slideshowImage").src = p.url;
+            const imgEl = document.getElementById("slideshowImage");
+            const vidEl = document.getElementById("slideshowVideo");
+
+            if(p.type === 'video') {
+                imgEl.classList.add("hidden");
+                vidEl.src = p.url;
+                vidEl.classList.remove("hidden");
+                vidEl.play();
+            } else {
+                vidEl.classList.add("hidden");
+                vidEl.pause();
+                imgEl.src = p.url;
+                imgEl.classList.remove("hidden");
+            }
+
             document.getElementById("slideshowCaption").innerText = `${p.name} • ${p.event}`;
             document.getElementById("slideshowMeta").innerText = p.timestamp;
         }
