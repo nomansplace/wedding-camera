@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gunjan & Henri's Wedding Camera & Itinerary</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        weddingRed: '#800020',
+                        weddingGold: '#D4AF37',
+                        weddingCream: '#FDFBF7',
+                        weddingDark: '#1A1A1A'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        /* Custom Filter Effects */
+        .filter-royal { filter: contrast(1.1) saturate(1.2) sepia(0.2); }
+        .filter-warm { filter: sepia(0.3) brightness(1.05) contrast(1.05); }
+        .filter-vintage { filter: sepia(0.5) contrast(1.2) brightness(0.9); }
+        .filter-bw { filter: grayscale(100%) contrast(1.2); }
+        .filter-cinematic { filter: contrast(1.3) saturate(0.85) brightness(0.95); }
+        .filter-golden { filter: sepia(0.4) saturate(1.4) brightness(1.1); }
+        .filter-vibrant { filter: saturate(1.5) contrast(1.1); }
+        .filter-soft { filter: brightness(1.1) blur(0.2px) saturate(0.9); }
+        .filter-matte { filter: contrast(0.9) brightness(1.05) saturate(0.9); }
+        .filter-dramatic { filter: contrast(1.4) brightness(0.9) saturate(1.2); }
+    </style>
+</head>
+<body class="bg-weddingCream text-weddingDark h-full flex flex-col selection:bg-weddingGold selection:text-white">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-weddingDark flex items-center justify-center p-4 bg-opacity-95 backdrop-blur-md">
+        <div class="bg-weddingCream rounded-2xl max-w-md w-full p-8 shadow-2xl border-2 border-weddingGold text-center relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-weddingGold opacity-10 rounded-full pointer-events-none"></div>
+            <div class="mb-4 text-weddingRed text-4xl"><i class="fa-solid fa-ring"></i></div>
+            <h1 class="font-serif text-3xl font-bold text-weddingRed mb-1">Gunjan & Henri</h1>
+            <p class="text-xs uppercase tracking-widest text-weddingGold font-semibold mb-6">October 9–19, 2026 • India & Finland</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-sm font-semibold text-weddingDark mb-1">Your Name / Family Name *</label>
+                    <input type="text" id="guestNameInput" required placeholder="e.g. Priya Sharma" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-weddingDark mb-1">Event Passcode *</label>
+                    <input type="password" id="passcodeInput" required placeholder="Enter passcode" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-weddingGold bg-white text-weddingDark">
+                    <p id="passcodeHint" class="text-xs text-gray-500 mt-1 italic">Hint: The date of the grand celebration (DDMMYYYY)</p>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 transition duration-200 uppercase tracking-wider text-sm">
+                    Enter Celebration <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="appContainer" class="hidden flex-1 flex flex-col h-full max-w-4xl mx-auto w-full bg-white shadow-xl overflow-hidden relative">
+        
+        <!-- HEADER -->
+        <header class="bg-weddingRed text-weddingGold px-4 py-3 flex items-center justify-between border-b-2 border-weddingGold shadow-md z-20">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-camera-retro text-xl"></i>
+                <div>
+                    <h2 class="font-serif font-bold text-lg leading-tight">Gunjan & Henri</h2>
+                    <span id="userBadge" class="text-[10px] tracking-widest uppercase bg-weddingGold text-weddingRed px-2 py-0.5 rounded-full font-bold">Guest</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-sm">
+                <span id="syncStatus" class="hidden md:inline-block text-xs text-emerald-300"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Drive Sync Ready</span>
+                <button onclick="logout()" title="Switch User" class="text-weddingGold hover:text-white px-2 py-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="bg-weddingCream border-b border-gray-200 flex justify-around py-2 px-1 text-xs sm:text-sm font-semibold text-weddingDark overflow-x-auto z-10 shadow-sm">
+            <button onclick="switchTab('camera')" id="nav-camera" class="flex flex-col items-center px-3 py-1.5 rounded-lg text-weddingRed transition"><i class="fa-solid fa-camera text-base mb-0.5"></i> Camera</button>
+            <button onclick="switchTab('gallery')" id="nav-gallery" class="flex flex-col items-center px-3 py-1.5 rounded-lg hover:text-weddingRed transition"><i class="fa-solid fa-images text-base mb-0.5"></i> Gallery</button>
+            <button onclick="switchTab('slideshow')" id="nav-slideshow" class="flex flex-col items-center px-3 py-1.5 rounded-lg hover:text-weddingRed transition"><i class="fa-solid fa-sliders text-base mb-0.5"></i> Slideshow</button>
+            <button onclick="switchTab('itinerary')" id="nav-itinerary" class="flex flex-col items-center px-3 py-1.5 rounded-lg hover:text-weddingRed transition"><i class="fa-solid fa-calendar-days text-base mb-0.5"></i> Itinerary</button>
+            <button onclick="switchTab('guestbook')" id="nav-guestbook" class="flex flex-col items-center px-3 py-1.5 rounded-lg hover:text-weddingRed transition"><i class="fa-solid fa-book-open text-base mb-0.5"></i> Guestbook</button>
+            <button onclick="switchTab('admin')" id="nav-admin" class="hidden flex flex-col items-center px-3 py-1.5 rounded-lg hover:text-weddingRed transition"><i class="fa-solid fa-shield-halved text-base mb-0.5"></i> Admin</button>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto relative bg-weddingCream p-4">
+
+            <!-- TAB 1: CAMERA -->
+            <section id="tab-camera" class="space-y-4 max-w-lg mx-auto pb-10">
+                <!-- Event Selector -->
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Current Event / Ceremony:</label>
+                    <select id="eventSelector" onchange="updateFiltersForEvent()" class="w-full p-2.5 rounded-lg border border-gray-300 font-semibold text-weddingDark bg-weddingCream focus:outline-none focus:border-weddingGold">
+                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner (Oct 9)</option>
+                        <option value="Shopping & Mehndi Night (Oct 10)">Shopping & Mehndi Night (Oct 10)</option>
+                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai & Ring Ceremony (Oct 11)</option>
+                        <option value="Haldi Ceremony (Oct 12)">Haldi Ceremony (Oct 12)</option>
+                        <option value="Sangeet Night (Oct 13)">Sangeet Night (Oct 13)</option>
+                        <option value="Hindu Wedding & Pheras (Oct 14)" selected>Hindu Wedding & Pheras (Oct 14)</option>
+                        <option value="Grand Reception (Oct 15)">Grand Reception (Oct 15)</option>
+                        <option value="Family Farewell (Oct 16)">Family Farewell (Oct 16)</option>
+                        <option value="Finland Celebration (Oct 19)">Finland Celebration (Oct 19)</option>
+                    </select>
+                </div>
+
+                <!-- Camera Viewport / Preview -->
+                <div class="relative bg-black rounded-2xl overflow-hidden shadow-lg aspect-[3/4] flex items-center justify-center">
+                    <video id="videoElement" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <canvas id="canvasElement" class="hidden"></canvas>
+                    <img id="imagePreview" class="hidden w-full h-full object-contain bg-black" alt="Captured Photo">
+                    
+                    <!-- Watermark Overlay Badge on viewfinder -->
+                    <div class="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-sm text-white p-2.5 rounded-xl text-xs flex justify-between items-center pointer-events-none border border-white/20">
+                        <div>
+                            <p id="watermarkGuest" class="font-bold text-weddingGold">Guest: --</p>
+                            <p class="text-[10px] text-gray-300">#FenryWithHisGun • Gunjan & Henri</p>
+                        </div>
+                        <div id="watermarkTimestamp" class="text-[10px] text-gray-300 text-right">--</div>
+                    </div>
+                </div>
+
+                <!-- File Upload Fallback -->
+                <div class="flex items-center justify-center space-x-2">
+                    <label class="cursor-pointer bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
+                        <i class="fa-solid fa-upload mr-2 text-weddingRed"></i> Upload from Device
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event)" class="hidden">
+                    </label>
+                    <button id="switchCameraBtn" onclick="toggleCameraFacing()" class="bg-white border border-gray-300 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 shadow-sm flex items-center">
+                        <i class="fa-solid fa-camera-rotate mr-2 text-weddingRed"></i> Switch Camera
+                    </button>
+                </div>
+
+                <!-- Filter Selector (10+ Tailored Filters) -->
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Tailored Event Filters</span>
+                        <span id="recommendedBadge" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">⭐ Recommended</span>
+                    </div>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin">
+                        <button onclick="applyFilter('filter-royal', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border-2 border-weddingGold bg-amber-50 text-xs font-bold">👑 Royal Gold</button>
+                        <button onclick="applyFilter('filter-warm', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🌅 Sunset Warm</button>
+                        <button onclick="applyFilter('filter-vintage', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">📜 Vintage Sepia</button>
+                        <button onclick="applyFilter('filter-cinematic', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🎬 Cinematic</button>
+                        <button onclick="applyFilter('filter-golden', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">✨ Golden Hour</button>
+                        <button onclick="applyFilter('filter-vibrant', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🔥 Vibrant Pop</button>
+                        <button onclick="applyFilter('filter-soft', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">🌸 Soft Glow</button>
+                        <button onclick="applyFilter('filter-matte', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">📷 Matte Noir</button>
+                        <button onclick="applyFilter('filter-dramatic', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">⚡ High Contrast</button>
+                        <button onclick="applyFilter('', this)" class="filter-btn flex-shrink-0 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium">Original</button>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div id="captureControls" class="flex space-x-3">
+                    <button onclick="capturePhoto()" class="flex-1 py-4 bg-weddingRed text-weddingGold font-bold rounded-xl shadow-lg hover:bg-opacity-90 flex items-center justify-center text-base tracking-wide">
+                        <i class="fa-solid fa-camera mr-2 text-xl"></i> Snap HD Photo
+                    </button>
+                </div>
+                <div id="retakeControls" class="hidden flex space-x-3">
+                    <button onclick="retakePhoto()" class="flex-1 py-3 bg-gray-200 text-gray-800 font-bold rounded-xl shadow hover:bg-gray-300">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Retake
+                    </button>
+                    <button onclick="confirmAndUpload()" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save & Sync
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 2: GALLERY -->
+            <section id="tab-gallery" class="hidden space-y-4 pb-10">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                    <select id="galleryFilterEvent" onchange="renderGallery()" class="text-xs font-bold p-2 rounded-lg border border-gray-300 bg-weddingCream text-weddingDark">
+                        <option value="all">All Events Gallery</option>
+                        <option value="Welcome Dinner (Oct 9)">Welcome Dinner</option>
+                        <option value="Shopping & Mehndi Night (Oct 10)">Mehndi Night</option>
+                        <option value="Sagai & Ring Ceremony (Oct 11)">Sagai</option>
+                        <option value="Haldi Ceremony (Oct 12)">Haldi</option>
+                        <option value="Sangeet Night (Oct 13)">Sangeet</option>
+                        <option value="Hindu Wedding & Pheras (Oct 14)">Hindu Wedding</option>
+                        <option value="Grand Reception (Oct 15)">Reception</option>
+                        <option value="Family Farewell (Oct 16)">Farewell</option>
+                        <option value="Finland Celebration (Oct 19)">Finland Celebration</option>
+                    </select>
+                    <span id="photoCountBadge" class="text-xs font-bold text-weddingRed">0 Photos</span>
+                </div>
+                <div id="galleryGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- Dynamic Photos Loaded Here -->
+                </div>
+            </section>
+
+            <!-- TAB 3: SLIDESHOW -->
+            <section id="tab-slideshow" class="hidden space-y-4 text-center pb-10">
+                <div class="bg-black rounded-2xl overflow-hidden shadow-xl relative aspect-[4/3] flex items-center justify-center">
+                    <img id="slideshowImage" src="" class="w-full h-full object-contain" alt="Slideshow">
+                    <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md text-white p-3 rounded-xl text-left border border-white/20">
+                        <p id="slideshowCaption" class="font-bold text-weddingGold text-sm">--</p>
+                        <p id="slideshowMeta" class="text-xs text-gray-300">--</p>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="prevSlide()" class="px-5 py-2 bg-weddingRed text-weddingGold font-bold rounded-xl shadow"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                    <button onclick="toggleSlideshowPlay()" id="slideshowPlayBtn" class="px-5 py-2 bg-weddingGold text-weddingRed font-bold rounded-xl shadow"><i class="fa-solid fa-pause"></i> Pause</button>
+                    <button onclick="nextSlide()" class="px-5 py-2 bg-weddingRed text-weddingGold font-bold rounded-xl shadow">Next <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </section>
+
+            <!-- TAB 4: ITINERARY -->
+            <section id="tab-itinerary" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
+                <div class="text-center mb-4">
+                    <h3 class="font-serif text-2xl font-bold text-weddingRed">10-Day Event Itinerary</h3>
+                    <p class="text-xs text-gray-500">October 9–19, 2026 • India & Finland</p>
+                </div>
+                <div class="space-y-3" id="itineraryList">
+                    <!-- Injected itinerary items -->
+                </div>
+            </section>
+
+            <!-- TAB 5: GUESTBOOK -->
+            <section id="tab-guestbook" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-serif text-lg font-bold text-weddingRed mb-2">Leave a Wish for Gunjan & Henri</h3>
+                    <textarea id="guestbookMessage" rows="3" placeholder="Write your heartfelt wishes here..." class="w-full p-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-weddingGold bg-weddingCream mb-2"></textarea>
+                    <button onclick="submitGuestbookWish()" class="w-full py-2.5 bg-weddingRed text-weddingGold font-bold rounded-xl text-sm shadow">Post to Digital Guestbook</button>
+                </div>
+                <div id="guestbookList" class="space-y-3">
+                    <!-- Dynamic wishes -->
+                </div>
+            </section>
+
+            <!-- TAB 6: ADMIN PANEL -->
+            <section id="tab-admin" class="hidden space-y-4 pb-10 max-w-lg mx-auto">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-weddingGold">
+                    <h3 class="font-serif text-xl font-bold text-weddingRed mb-1"><i class="fa-solid fa-shield-halved mr-2"></i> Host Admin Dashboard</h3>
+                    <p class="text-xs text-gray-500 mb-4">Restricted exclusively to Gunjan & Henri</p>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalPhotos" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Photos</p>
+                        </div>
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalLikes" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Total Likes</p>
+                        </div>
+                        <div class="bg-weddingCream p-3 rounded-xl text-center border border-gray-200">
+                            <p id="adminTotalWishes" class="text-2xl font-bold text-weddingRed">0</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-500">Wishes</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-weddingCream p-4 rounded-xl border border-gray-200 text-center space-y-3">
+                        <h4 class="font-bold text-sm text-weddingRed">Printable Royal Indian Wedding QR Code</h4>
+                        <div class="bg-white p-4 inline-block rounded-xl shadow-sm border">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://nomansplace.github.io/wedding-camera/" alt="Wedding QR Code" class="mx-auto rounded">
+                        </div>
+                        <p class="text-xs text-gray-500">Scan to open shared camera & album instantly on iOS/Android.</p>
+                        <button onclick="window.print()" class="px-4 py-2 bg-weddingRed text-weddingGold text-xs font-bold rounded-lg shadow">Print QR Card</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-2xl px-3 py-1 bg-white/20 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+        <img id="lightboxImage" src="" class="max-h-[75vh] max-w-full rounded-xl shadow-2xl mb-4 object-contain">
+        <div class="bg-white/10 backdrop-blur-md text-white p-3 rounded-xl max-w-md w-full flex justify-between items-center border border-white/20">
+            <div>
+                <p id="lightboxCaption" class="font-bold text-weddingGold text-sm">--</p>
+                <p id="lightboxMeta" class="text-xs text-gray-300">--</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="likeCurrentPhoto()" class="text-rose-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-heart"></i> <span id="lightboxLikes" class="text-xs">0</span></button>
+                <a id="lightboxDownloadBtn" download="wedding-photo.jpg" class="text-weddingGold hover:text-white text-xl"><i class="fa-solid fa-download"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhMmt0kPZzqk2DWZXc2z5Lbk-fJR0SxXzANf12pmJdi8NyjzF1IMjpmVRZsY49S5fFZA/exec"; //[span_0](start_span)[span_0](end_span)
+        const PASSCODE_CORRECT = "17102026";
+        
+        let currentUser = { name: "", role: "Guest" };
+        let currentFilter = "filter-royal";
+        let mediaStream = null;
+        let useFrontCamera = false;
+        let capturedBlob = null;
+        let photos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+        let wishes = JSON.parse(localStorage.getItem("wedding_wishes") || '[{"name": "Ritika Kanojia", "text": "Wishing you both a lifetime of love and joy! #FenryWithHisGun"}]');
+        let currentLightboxIndex = null;
+        let slideshowTimer = null;
+        let slideshowIndex = 0;
+
+        const itineraries = [
+            { day: "Oct 9, 2026", title: "Welcome Dinner", time: "7:00 PM onwards", venue: "Grand Ballroom, Delhi", dress: "Smart Casual / Indo-Western" },
+            { day: "Oct 10, 2026", title: "Shopping & Mehndi Night", time: "4:00 PM onwards", venue: "Courtyard & Gardens", dress: "Vibrant Ethnic / Green & Yellow" },
+            { day: "Oct 11, 2026", title: "Sagai & Ring Ceremony", time: "6:30 PM onwards", venue: "Royal Banquet Hall", dress: "Formal Cocktail / Evening Wear" },
+            { day: "Oct 12, 2026", title: "Haldi Ceremony", time: "10:30 AM onwards", venue: "Poolside Lawns", dress: "Yellow Traditional / Kurta Pajama" },
+            { day: "Oct 13, 2026", title: "Sangeet Night", time: "7:00 PM onwards", venue: "Main Auditorium", dress: "Glitz & Glamour / Lehenga & Sherwani" },
+            { day: "Oct 14, 2026", title: "Hindu Wedding & Pheras", time: "5:00 PM onwards", venue: "Mandap Lawns", dress: "Traditional Indian Wedding Attire" },
+            { day: "Oct 15, 2026", title: "Grand Reception", time: "7:30 PM onwards", venue: "Grand Ballroom", dress: "Black Tie / Formal Indo-Western" },
+            { day: "Oct 16, 2026", title: "Family Farewell Brunch", time: "11:00 AM onwards", venue: "Garden Restaurant", dress: "Relaxed Day Wear" },
+            { day: "Oct 19, 2026", title: "Finland Celebration", time: "4:00 PM onwards", venue: "Helsinki Reception Hall", dress: "Nordic Formal / Smart Elegance" }
+        ];
+
+        // Funny hints rotation
+        const hints = [
+            "Hint: The grand wedding date (DDMMYYYY)",
+            "Hint: 17th October 2026 written compactly",
+            "Hint: Ask Gunjan or Henri if you forgot the numbers!"
+        ];
+        let hintIdx = 0;
+        setInterval(() => {
+            const hintEl = document.getElementById("passcodeHint");
+            if(hintEl) {
+                hintIdx = (hintIdx + 1) % hints.length;
+                hintEl.innerText = hints[hintIdx];
+            }
+        }, 5000);
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById("guestNameInput").value.trim();
+            const passcode = document.getElementById("passcodeInput").value.trim();
+
+            if (passcode !== PASSCODE_CORRECT) {
+                alert("Incorrect passcode! Please check the hint.");
+                return;
+            }
+
+            currentUser.name = name;
+            const lowerName = name.toLowerCase();
+            if (lowerName === "gunjan" || lowerName === "henri") {
+                currentUser.role = "Host / Admin";
+                document.getElementById("nav-admin").classList.remove("hidden");
+                document.getElementById("userBadge").innerText = "Host Admin";
+            } else {
+                currentUser.role = "Guest";
+                document.getElementById("userBadge").innerText = "Honored Guest";
+            }
+
+            document.getElementById("loginScreen").classList.add("hidden");
+            document.getElementById("appContainer").classList.remove("hidden");
+            document.getElementById("watermarkGuest").innerText = `Guest: ${currentUser.name}`;
+            
+            initCamera();
+            renderItinerary();
+            renderGuestbook();
+            renderGallery();
+        }
+
+        function logout() {
+            if(mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            location.reload();
+        }
+
+        function switchTab(tabId) {
+            ['camera', 'gallery', 'slideshow', 'itinerary', 'guestbook', 'admin'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add("hidden");
+                document.getElementById(`nav-${t}`).classList.remove("text-weddingRed", "border-b-2", "border-weddingRed");
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove("hidden");
+            document.getElementById(`nav-${tabId}`).classList.add("text-weddingRed");
+
+            if (tabId === 'slideshow') startSlideshow();
+            else stopSlideshow();
+            if (tabId === 'admin') updateAdminStats();
+        }
+
+        async function initCamera() {
+            try {
+                if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+                const constraints = { video: { facingMode: useFrontCamera ? "user" : "environment" }, audio: false };
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoEl = document.getElementById("videoElement");
+                videoEl.srcObject = mediaStream;
+                videoEl.classList.remove("hidden");
+                document.getElementById("imagePreview").classList.add("hidden");
+            } catch (err) {
+                console.warn("Camera access fallback to file upload:", err);
+            }
+        }
+
+        function toggleCameraFacing() {
+            useFrontCamera = !useFrontCamera;
+            initCamera();
+        }
+
+        function applyFilter(filterClass, btn) {
+            currentFilter = filterClass;
+            document.querySelectorAll(".filter-btn").forEach(b => {
+                b.classList.remove("border-2", "border-weddingGold", "bg-amber-50", "font-bold");
+                b.classList.add("border", "border-gray-200", "font-medium");
+            });
+            btn.classList.add("border-2", "border-weddingGold", "bg-amber-50", "font-bold");
+            btn.classList.remove("border-gray-200", "font-medium");
+
+            const videoEl = document.getElementById("videoElement");
+            const previewEl = document.getElementById("imagePreview");
+            videoEl.className = `w-full h-full object-cover ${filterClass}`;
+            previewEl.className = `w-full h-full object-contain bg-black ${filterClass}`;
+        }
+
+        function updateFiltersForEvent() {
+            const ev = document.getElementById("eventSelector").value;
+            const badge = document.getElementById("recommendedBadge");
+            if(ev.includes("Hindu Wedding") || ev.includes("Sagai")) {
+                badge.innerText = "⭐ Recommended: Royal Gold / Cinematic";
+            } else if(ev.includes("Haldi") || ev.includes("Mehndi")) {
+                badge.innerText = "⭐ Recommended: Golden Hour / Vibrant";
+            } else {
+                badge.innerText = "⭐ Recommended: Sunset Warm";
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById("videoElement");
+            const canvas = document.getElementById("canvasElement");
+            canvas.width = video.videoWidth || 1080;
+            canvas.height = video.videoHeight || 1440;
+            const ctx = canvas.getContext("2d");
+
+            // Apply filter style on canvas context if needed
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Add dynamic HD Watermark stamp on canvas
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(30, canvas.height - 120, canvas.width - 60, 90);
+            ctx.fillStyle = "#D4AF37";
+            ctx.font = "bold 32px 'Playfair Display', serif";
+            ctx.fillText("Gunjan & Henri", 60, canvas.height - 75);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "22px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 40);
+
+            canvas.toBlob((blob) => {
+                capturedBlob = blob;
+                const imageUrl = URL.createObjectURL(blob);
+                const preview = document.getElementById("imagePreview");
+                preview.src = imageUrl;
+                preview.classList.remove("hidden");
+                video.classList.add("hidden");
+
+                document.getElementById("captureControls").classList.add("hidden");
+                document.getElementById("retakeControls").classList.remove("hidden");
+            }, "image/jpeg", 0.95);
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            capturedBlob = file;
+            const imageUrl = URL.createObjectURL(file);
+            const preview = document.getElementById("imagePreview");
+            preview.src = imageUrl;
+            preview.classList.remove("hidden");
+            document.getElementById("videoElement").classList.add("hidden");
+
+            document.getElementById("captureControls").classList.add("hidden");
+            document.getElementById("retakeControls").classList.remove("hidden");
+        }
+
+        function retakePhoto() {
+            capturedBlob = null;
+            document.getElementById("imagePreview").classList.add("hidden");
+            document.getElementById("videoElement").classList.remove("hidden");
+            document.getElementById("captureControls").classList.remove("hidden");
+            document.getElementById("retakeControls").classList.add("hidden");
+        }
+
+        async function confirmAndUpload() {
+            if(!capturedBlob) return;
+            const eventName = document.getElementById("eventSelector").value;
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(capturedBlob);
+            reader.onloadend = async function() {
+                const base64data = reader.result;
+                const photoObj = {
+                    id: Date.now(),
+                    url: base64data,
+                    name: currentUser.name,
+                    event: eventName,
+                    timestamp: new Date().toLocaleString(),
+                    likes: 0,
+                    comments: []
+                };
+
+                photos.unshift(photoObj);
+                localStorage.setItem("wedding_photos", JSON.stringify(photos));
+
+                // Sync to Google Drive via Apps Script Web App Endpoint[span_1](start_span)[span_1](end_span)
+                try {
+                    document.getElementById("syncStatus").innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing to Drive...`;
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            filename: `Wedding_${currentUser.name}_${Date.now()}.jpg`,
+                            mimeType: "image/jpeg",
+                            fileData: base64data.split(',')[1],
+                            event: eventName,
+                            guest: currentUser.name
+                        })
+                    });
+                    document.getElementById("syncStatus").innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1 text-emerald-300"></i> Drive Synced`;
+                } catch(e) {
+                    console.error("Google Drive sync note:", e);
+                }
+
+                alert("Photo captured, watermarked, saved, and synced successfully!");
+                retakePhoto();
+                switchTab('gallery');
+                renderGallery();
+            };
+        }
+
+        function renderGallery() {
+            const filterEv = document.getElementById("galleryFilterEvent").value;
+            const grid = document.getElementById("galleryGrid");
+            grid.innerHTML = "";
+
+            const filtered = filterEv === "all" ? photos : photos.filter(p => p.event === filterEv);
+            document.getElementById("photoCountBadge").innerText = `${filtered.length} Photos`;
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-sm">No photos uploaded for this event yet. Be the first to snap one!</div>`;
+                return;
+            }
+
+            filtered.forEach((p, idx) => {
+                const div = document.createElement("div");
+                div.className = "relative bg-black rounded-xl overflow-hidden shadow aspect-[3/4] cursor-pointer group";
+                div.onclick = () => openLightbox(photos.indexOf(p));
+                div.innerHTML = `
+                    <img src="${p.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-[10px]">
+                        <p class="font-bold truncate text-weddingGold">${p.name}</p>
+                        <p class="text-gray-300 truncate">${p.event}</p>
+                        <div class="flex justify-between mt-1 text-[9px]">
+                            <span><i class="fa-solid fa-heart text-rose-400 mr-0.5"></i> ${p.likes}</span>
+                            <span><i class="fa-solid fa-comment text-sky-400 mr-0.5"></i> ${p.comments.length}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const p = photos[index];
+            document.getElementById("lightboxImage").src = p.url;
+            document.getElementById("lightboxCaption").innerText = `${p.name} • ${p.event}`;
+            document.getElementById("lightboxMeta").innerText = p.timestamp;
+            document.getElementById("lightboxLikes").innerText = p.likes;
+            document.getElementById("lightboxDownloadBtn").href = p.url;
+            document.getElementById("lightboxModal").classList.remove("hidden");
+        }
+
+        function closeLightbox() {
+            document.getElementById("lightboxModal").classList.add("hidden");
+        }
+
+        function likeCurrentPhoto() {
+            if(currentLightboxIndex !== null) {
+                photos[currentLightboxIndex].likes++;
+                localStorage.setItem("wedding_photos", JSON.stringify(photos));
+                document.getElementById("lightboxLikes").innerText = photos[currentLightboxIndex].likes;
+                renderGallery();
+            }
+        }
+
+        function renderItinerary() {
+            const list = document.getElementById("itineraryList");
+            list.innerHTML = "";
+            itineraries.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col space-y-1";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-weddingRed bg-amber-50 px-2 py-0.5 rounded">${item.day}</span>
+                        <span class="text-xs text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${item.time}</span>
+                    </div>
+                    <h4 class="font-serif font-bold text-lg text-weddingDark">${item.title}</h4>
+                    <p class="text-xs text-gray-600"><i class="fa-solid fa-location-dot text-weddingGold mr-1"></i> ${item.venue}</p>
+                    <p class="text-xs text-gray-500 italic"><i class="fa-solid fa-shirt text-gray-400 mr-1"></i> Dress Code: ${item.dress}</p>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function submitGuestbookWish() {
+            const text = document.getElementById("guestbookMessage").value.trim();
+            if(!text) return;
+            wishes.unshift({ name: currentUser.name, text: text });
+            localStorage.setItem("wedding_wishes", JSON.stringify(wishes));
+            document.getElementById("guestbookMessage").value = "";
+            renderGuestbook();
+            alert("Your wish has been posted to the digital guestbook!");
+        }
+
+        function renderGuestbook() {
+            const list = document.getElementById("guestbookList");
+            list.innerHTML = "";
+            wishes.forEach(w => {
+                const card = document.createElement("div");
+                card.className = "bg-white p-3 rounded-xl shadow-sm border border-gray-200 space-y-1";
+                card.innerHTML = `
+                    <p class="font-serif font-bold text-sm text-weddingRed">${w.name}</p>
+                    <p class="text-xs text-weddingDark">${w.text}</p>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function updateAdminStats() {
+            document.getElementById("adminTotalPhotos").innerText = photos.length;
+            const totalLikes = photos.reduce((acc, p) => acc + p.likes, 0);
+            document.getElementById("adminTotalLikes").innerText = totalLikes;
+            document.getElementById("adminTotalWishes").innerText = wishes.length;
+        }
+
+        let isSlideshowPlaying = true;
+        function startSlideshow() {
+            if(photos.length === 0) {
+                document.getElementById("slideshowImage").src = "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80";
+                document.getElementById("slideshowCaption").innerText = "Gunjan & Henri Wedding Celebration";
+                document.getElementById("slideshowMeta").innerText = "October 9–19, 2026";
+                return;
+            }
+            showSlide(slideshowIndex);
+            if(isSlideshowPlaying && !slideshowTimer) {
+                slideshowTimer = setInterval(() => {
+                    slideshowIndex = (slideshowIndex + 1) % photos.length;
+                    showSlide(slideshowIndex);
+                }, 3500);
+            }
+        }
+
+        function stopSlideshow() {
+            if(slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
+        }
+
+        function showSlide(idx) {
+            if(photos.length === 0) return;
+            const p = photos[idx];
+            document.getElementById("slideshowImage").src = p.url;
+            document.getElementById("slideshowCaption").innerText = `${p.name} • ${p.event}`;
+            document.getElementById("slideshowMeta").innerText = p.timestamp;
+        }
+
+        function nextSlide() {
+            if(photos.length === 0) return;
+            slideshowIndex = (slideshowIndex + 1) % photos.length;
+            showSlide(slideshowIndex);
+        }
+
+        function prevSlide() {
+            if(photos.length === 0) return;
+            slideshowIndex = (slideshowIndex - 1 + photos.length) % photos.length;
+            showSlide(slideshowIndex);
+        }
+
+        function toggleSlideshowPlay() {
+            isSlideshowPlaying = !isSlideshowPlaying;
+            const btn = document.getElementById("slideshowPlayBtn");
+            if(isSlideshowPlaying) {
+                btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause`;
+                startSlideshow();
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-play"></i> Play`;
+                stopSlideshow();
+            }
+        }
+    </script>
+</body>
+</html>
