@@ -38,10 +38,6 @@
         .filter-soft { filter: brightness(1.1) blur(0.2px) saturate(0.9); }
         .filter-matte { filter: contrast(0.9) brightness(1.05) saturate(0.9); }
         .filter-dramatic { filter: contrast(1.4) brightness(0.9) saturate(1.2); }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        .animate-pulse-slow { animation: pulse-slow 2s infinite; }
     </style>
 </head>
 <body class="bg-weddingCream text-weddingDark h-full flex flex-col selection:bg-weddingGold selection:text-white">
@@ -134,11 +130,11 @@
                         <i class="fa-solid fa-circle mr-1.5 text-[8px]"></i> Recording Video...
                     </div>
 
-                    <!-- Watermark Overlay Badge on viewfinder -->
+                    <!-- Watermark Overlay Badge with Rotating Hashtag -->
                     <div class="absolute bottom-3 left-3 right-3 bg-black/50 backdrop-blur-sm text-white p-2.5 rounded-xl text-xs flex justify-between items-center pointer-events-none border border-white/20">
                         <div>
                             <p id="watermarkGuest" class="font-bold text-weddingGold">Guest: --</p>
-                            <p class="text-[10px] text-gray-300">#FenryWithHisGun • Gunjan & Henri</p>
+                            <p id="watermarkHashtag" class="text-[10px] text-gray-300">#FenryWithHisGun • Gunjan & Henri</p>
                         </div>
                         <div id="watermarkTimestamp" class="text-[10px] text-gray-300 text-right">--</div>
                     </div>
@@ -325,6 +321,24 @@
         let slideshowTimer = null;
         let slideshowIndex = 0;
 
+        // Rotating wedding hashtags pool
+        const weddingHashtags = [
+            "#FenryWithHisGun",
+            "#GunjanWedsHenri",
+            "#TheFinlandIndianWedding",
+            "#NordicNuptials",
+            "#FromDelhiWithLove",
+            "#HelsinkiHoneys",
+            "#PherasInParadise",
+            "#CurryMeHenri"
+        ];
+        let currentHashtag = weddingHashtags[0];
+
+        function getRandomHashtag() {
+            const randomIndex = Math.floor(Math.random() * weddingHashtags.length);
+            return weddingHashtags[randomIndex];
+        }
+
         const itineraries = [
             { day: "Oct 9, 2026", title: "Welcome Dinner", time: "7:00 PM onwards", venue: "Grand Ballroom, Delhi", dress: "Smart Casual / Indo-Western" },
             { day: "Oct 10, 2026", title: "Shopping & Mehndi Night", time: "4:00 PM onwards", venue: "Courtyard & Gardens", dress: "Vibrant Ethnic / Green & Yellow" },
@@ -378,6 +392,10 @@
             document.getElementById("appContainer").classList.remove("hidden");
             document.getElementById("watermarkGuest").innerText = `Guest: ${currentUser.name}`;
             
+            // Assign initial random rotating hashtag for viewfinder
+            currentHashtag = getRandomHashtag();
+            document.getElementById("watermarkHashtag").innerText = `${currentHashtag} • Gunjan & Henri`;
+
             initCamera();
             renderItinerary();
             renderGuestbook();
@@ -459,6 +477,9 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const shotTimestamp = new Date().toLocaleString();
 
+            // Pick a fresh rotating hashtag for this specific photo
+            currentHashtag = getRandomHashtag();
+
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(30, canvas.height - 140, canvas.width - 60, 110);
             ctx.fillStyle = "#D4AF37";
@@ -466,7 +487,7 @@
             ctx.fillText("Gunjan & Henri", 60, canvas.height - 90);
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
-            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 55);
+            ctx.fillText(`Guest: ${currentUser.name} • ${currentHashtag}`, 60, canvas.height - 55);
             ctx.fillText(`Shot: ${shotTimestamp}`, 60, canvas.height - 25);
 
             canvas.toBlob((blob) => {
@@ -502,6 +523,9 @@
                 mediaRecorder.onstop = () => {
                     capturedBlob = new Blob(recordedChunks, { type: 'video/webm' });
                     isVideoMode = true;
+                    // Assign a new rotating hashtag for this video recording
+                    currentHashtag = getRandomHashtag();
+
                     const videoUrl = URL.createObjectURL(capturedBlob);
                     const vPreview = document.getElementById("videoPreview");
                     vPreview.src = videoUrl;
@@ -527,337 +551,4 @@
 
         function handleFileUpload(e) {
             const files = e.target.files;
-            if(!files || files.length === 0) return;
-            const eventName = document.getElementById("eventSelector").value;
-
-            Array.from(files).forEach(file => {
-                const shotDate = file.lastModified ? new Date(file.lastModified) : new Date();
-                const shotTimestamp = shotDate.toLocaleString();
-                const isVid = file.type.startsWith('video');
-
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onloadend = function() {
-                    const base64data = reader.result;
-                    if(isVid) {
-                        const mediaObj = {
-                            id: Date.now() + Math.random(),
-                            url: base64data,
-                            type: 'video',
-                            name: currentUser.name,
-                            event: eventName,
-                            timestamp: shotTimestamp,
-                            likes: 0,
-                            comments: []
-                        };
-                        photos.unshift(mediaObj);
-                        localStorage.setItem("wedding_photos", JSON.stringify(photos));
-                        renderGallery();
-                        updateAdminStats();
-                    } else {
-                        const img = new Image();
-                        img.src = base64data;
-                        img.onload = function() {
-                            const canvas = document.createElement("canvas");
-                            canvas.width = img.width || 1080;
-                            canvas.height = img.height || 1440;
-                            const ctx = canvas.getContext("2d");
-
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                            ctx.fillRect(30, canvas.height - 140, canvas.width - 60, 110);
-                            ctx.fillStyle = "#D4AF37";
-                            ctx.font = "bold 32px 'Playfair Display', serif";
-                            ctx.fillText("Gunjan & Henri", 60, canvas.height - 90);
-                            ctx.fillStyle = "#FFFFFF";
-                            ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
-                            ctx.fillText(`Guest: ${currentUser.name} • #FenryWithHisGun`, 60, canvas.height - 55);
-                            ctx.fillText(`Shot: ${shotTimestamp}`, 60, canvas.height - 25);
-
-                            const watermarkedUrl = canvas.toDataURL("image/jpeg", 0.95);
-
-                            const photoObj = {
-                                id: Date.now() + Math.random(),
-                                url: watermarkedUrl,
-                                type: 'image',
-                                name: currentUser.name,
-                                event: eventName,
-                                timestamp: shotTimestamp,
-                                likes: 0,
-                                comments: []
-                            };
-
-                            photos.unshift(photoObj);
-                            localStorage.setItem("wedding_photos", JSON.stringify(photos));
-                            renderGallery();
-                            updateAdminStats();
-                        };
-                    }
-                };
-            });
-
-            alert(`${files.length} media file(s) uploaded successfully!`);
-            switchTab('gallery');
-        }
-
-        function retakePhoto() {
-            capturedBlob = null;
-            isVideoMode = false;
-            document.getElementById("imagePreview").classList.add("hidden");
-            document.getElementById("videoPreview").classList.add("hidden");
-            document.getElementById("videoElement").classList.remove("hidden");
-            document.getElementById("recordingBadge").classList.add("hidden");
-            document.getElementById("captureControls").classList.remove("hidden");
-            document.getElementById("retakeControls").classList.add("hidden");
-        }
-
-        async function confirmAndUpload() {
-            if(!capturedBlob) return;
-            const eventName = document.getElementById("eventSelector").value;
-            const shotTimestamp = new Date().toLocaleString();
-            
-            const reader = new FileReader();
-            reader.readAsDataURL(capturedBlob);
-            reader.onloadend = async function() {
-                const base64data = reader.result;
-                const mediaObj = {
-                    id: Date.now(),
-                    url: base64data,
-                    type: isVideoMode ? 'video' : 'image',
-                    name: currentUser.name,
-                    event: eventName,
-                    timestamp: shotTimestamp,
-                    likes: 0,
-                    comments: []
-                };
-
-                photos.unshift(mediaObj);
-                localStorage.setItem("wedding_photos", JSON.stringify(photos));
-
-                try {
-                    document.getElementById("syncStatus").innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing to Drive...`;
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: "POST",
-                        mode: "no-cors",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            filename: `Wedding_${currentUser.name}_${Date.now()}.${isVideoMode ? 'webm' : 'jpg'}`,
-                            mimeType: isVideoMode ? 'video/webm' : 'image/jpeg',
-                            fileData: base64data.split(',')[1],
-                            event: eventName,
-                            guest: currentUser.name
-                        })
-                    });
-                    document.getElementById("syncStatus").innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1 text-emerald-300"></i> Drive Synced`;
-                } catch(e) {
-                    console.error("Google Drive sync note:", e);
-                }
-
-                alert("Media captured, saved, and synced successfully!");
-                retakePhoto();
-                switchTab('gallery');
-                renderGallery();
-            };
-        }
-
-        function renderGallery() {
-            const filterEv = document.getElementById("galleryFilterEvent").value;
-            const grid = document.getElementById("galleryGrid");
-            grid.innerHTML = "";
-
-            const filtered = filterEv === "all" ? photos : photos.filter(p => p.event === filterEv);
-            document.getElementById("photoCountBadge").innerText = `${filtered.length} Media Items`;
-
-            if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-sm">No media uploaded for this event yet. Be the first to add one!</div>`;
-                return;
-            }
-
-            filtered.forEach((p) => {
-                const div = document.createElement("div");
-                div.className = "relative bg-black rounded-xl overflow-hidden shadow aspect-[3/4] cursor-pointer group";
-                div.onclick = () => openLightbox(photos.indexOf(p));
-                
-                let mediaContent = `<img src="${p.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`;
-                if(p.type === 'video') {
-                    mediaContent = `
-                        <video src="${p.url}" class="w-full h-full object-cover"></video>
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/30"><i class="fa-solid fa-circle-play text-white text-3xl"></i></div>
-                    `;
-                }
-
-                div.innerHTML = `
-                    ${mediaContent}
-                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-[10px]">
-                        <p class="font-bold truncate text-weddingGold">${p.name}</p>
-                        <p class="text-gray-300 truncate">${p.event}</p>
-                        <div class="flex justify-between mt-1 text-[9px]">
-                            <span><i class="fa-solid fa-heart text-rose-400 mr-0.5"></i> ${p.likes}</span>
-                            <span><i class="fa-solid fa-comment text-sky-400 mr-0.5"></i> ${p.comments.length}</span>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
-        }
-
-        function openLightbox(index) {
-            currentLightboxIndex = index;
-            const p = photos[index];
-            const imgEl = document.getElementById("lightboxImage");
-            const vidEl = document.getElementById("lightboxVideo");
-
-            if(p.type === 'video') {
-                imgEl.classList.add("hidden");
-                vidEl.src = p.url;
-                vidEl.classList.remove("hidden");
-            } else {
-                vidEl.classList.add("hidden");
-                imgEl.src = p.url;
-                imgEl.classList.remove("hidden");
-            }
-
-            document.getElementById("lightboxCaption").innerText = `${p.name} • ${p.event}`;
-            document.getElementById("lightboxMeta").innerText = p.timestamp;
-            document.getElementById("lightboxLikes").innerText = p.likes;
-            document.getElementById("lightboxDownloadBtn").href = p.url;
-            document.getElementById("lightboxModal").classList.remove("hidden");
-        }
-
-        function closeLightbox() {
-            document.getElementById("lightboxModal").classList.add("hidden");
-            document.getElementById("lightboxVideo").pause();
-        }
-
-        function likeCurrentPhoto() {
-            if(currentLightboxIndex !== null) {
-                photos[currentLightboxIndex].likes++;
-                localStorage.setItem("wedding_photos", JSON.stringify(photos));
-                document.getElementById("lightboxLikes").innerText = photos[currentLightboxIndex].likes;
-                renderGallery();
-            }
-        }
-
-        function renderItinerary() {
-            const list = document.getElementById("itineraryList");
-            list.innerHTML = "";
-            itineraries.forEach(item => {
-                const card = document.createElement("div");
-                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col space-y-1";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-weddingRed bg-amber-50 px-2 py-0.5 rounded">${item.day}</span>
-                        <span class="text-xs text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${item.time}</span>
-                    </div>
-                    <h4 class="font-serif font-bold text-lg text-weddingDark">${item.title}</h4>
-                    <p class="text-xs text-gray-600"><i class="fa-solid fa-location-dot text-weddingGold mr-1"></i> ${item.venue}</p>
-                    <p class="text-xs text-gray-500 italic"><i class="fa-solid fa-shirt text-gray-400 mr-1"></i> Dress Code: ${item.dress}</p>
-                `;
-                list.appendChild(card);
-            });
-        }
-
-        function submitGuestbookWish() {
-            const text = document.getElementById("guestbookMessage").value.trim();
-            if(!text) return;
-            wishes.unshift({ name: currentUser.name, text: text });
-            localStorage.setItem("wedding_wishes", JSON.stringify(wishes));
-            document.getElementById("guestbookMessage").value = "";
-            renderGuestbook();
-            alert("Your wish has been posted to the digital guestbook!");
-        }
-
-        function renderGuestbook() {
-            const list = document.getElementById("guestbookList");
-            list.innerHTML = "";
-            wishes.forEach(w => {
-                const card = document.createElement("div");
-                card.className = "bg-white p-3 rounded-xl shadow-sm border border-gray-200 space-y-1";
-                card.innerHTML = `
-                    <p class="font-serif font-bold text-sm text-weddingRed">${w.name}</p>
-                    <p class="text-xs text-weddingDark">${w.text}</p>
-                `;
-                list.appendChild(card);
-            });
-        }
-
-        function updateAdminStats() {
-            document.getElementById("adminTotalPhotos").innerText = photos.length;
-            const totalLikes = photos.reduce((acc, p) => acc + p.likes, 0);
-            document.getElementById("adminTotalLikes").innerText = totalLikes;
-            document.getElementById("adminTotalWishes").innerText = wishes.length;
-        }
-
-        let isSlideshowPlaying = true;
-        function startSlideshow() {
-            if(photos.length === 0) {
-                document.getElementById("slideshowImage").src = "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80";
-                document.getElementById("slideshowCaption").innerText = "Gunjan & Henri Wedding Celebration";
-                document.getElementById("slideshowMeta").innerText = "October 9–19, 2026";
-                return;
-            }
-            showSlide(slideshowIndex);
-            if(isSlideshowPlaying && !slideshowTimer) {
-                slideshowTimer = setInterval(() => {
-                    slideshowIndex = (slideshowIndex + 1) % photos.length;
-                    showSlide(slideshowIndex);
-                }, 4000);
-            }
-        }
-
-        function stopSlideshow() {
-            if(slideshowTimer) {
-                clearInterval(slideshowTimer);
-                slideshowTimer = null;
-            }
-        }
-
-        function showSlide(idx) {
-            if(photos.length === 0) return;
-            const p = photos[idx];
-            const imgEl = document.getElementById("slideshowImage");
-            const vidEl = document.getElementById("slideshowVideo");
-
-            if(p.type === 'video') {
-                imgEl.classList.add("hidden");
-                vidEl.src = p.url;
-                vidEl.classList.remove("hidden");
-                vidEl.play();
-            } else {
-                vidEl.classList.add("hidden");
-                vidEl.pause();
-                imgEl.src = p.url;
-                imgEl.classList.remove("hidden");
-            }
-
-            document.getElementById("slideshowCaption").innerText = `${p.name} • ${p.event}`;
-            document.getElementById("slideshowMeta").innerText = p.timestamp;
-        }
-
-        function nextSlide() {
-            if(photos.length === 0) return;
-            slideshowIndex = (slideshowIndex + 1) % photos.length;
-            showSlide(slideshowIndex);
-        }
-
-        function prevSlide() {
-            if(photos.length === 0) return;
-            slideshowIndex = (slideshowIndex - 1 + photos.length) % photos.length;
-            showSlide(slideshowIndex);
-        }
-
-        function toggleSlideshowPlay() {
-            isSlideshowPlaying = !isSlideshowPlaying;
-            const btn = document.getElementById("slideshowPlayBtn");
-            if(isSlideshowPlaying) {
-                btn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause`;
-                startSlideshow();
-            } else {
-                btn.innerHTML = `<i class="fa-solid fa-play"></i> Play`;
-                stopSlideshow();
-            }
-        }
-    </script>
-</body>
-</html>
+            if(!files ||
